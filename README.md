@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Bucket0
 
-## Getting Started
+Bucket0 is a Bucket0-inspired file storage dashboard built with Next.js. It gives users a managed **My Drive** plus support for connecting external **S3-compatible buckets** like Amazon S3, Cloudflare R2, and Wasabi.
 
-First, run the development server:
+## What it does
+
+- Email/password + GitHub/Google auth
+- Managed storage with per-user isolation
+- External bucket connections
+- File and folder browsing
+- File upload, folder upload, drag-and-drop upload
+- Multipart uploads for large files
+- Preview, download, and delete
+- List + grid views
+- Search, filter, sort, pagination
+- Responsive dashboard UI
+
+## Tech stack
+
+- **Framework:** Next.js 16, React 19, TypeScript
+- **Styling/UI:** Tailwind CSS 4, shadcn/ui, Radix UI, Lucide
+- **Auth:** Better Auth
+- **Database/ORM:** Neon Postgres, Prisma 7, Prisma Accelerate
+- **Storage:** Amazon S3, Cloudflare R2, Wasabi
+- **Uploads:** AWS SDK v3, presigned URLs, multipart uploads
+- **Validation/UX:** Zod, react-hot-toast
+- **Deploy:** Vercel
+
+## Architecture
+
+- **My Drive:** app-managed S3 bucket with a per-user prefix
+- **External buckets:** user-provided S3-compatible credentials encrypted server-side before storage
+- **Uploads:** browser uploads directly to object storage using presigned URLs
+
+## Local development
 
 ```bash
+npm install
+npx prisma generate
+npx prisma migrate dev
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Required services
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Neon/Postgres database
+- Better Auth providers (GitHub / Google if you want social login)
+- An S3 bucket for managed storage
+- Optional external buckets for testing S3 / R2 / Wasabi connections
 
-## Learn More
+## Notes
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This is an MVP focused on strong file workflows and a polished storage dashboard rather than a full production storage platform.
