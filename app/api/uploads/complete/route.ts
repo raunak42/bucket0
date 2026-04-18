@@ -1,7 +1,11 @@
+import { Prisma } from "@/app/generated/prisma/client";
 import { prisma } from "@/utils/prisma";
 import { CompleteMultipartUploadCommand } from "@/utils/s3";
 import { z } from "zod";
-import { getManagedUploadContext } from "../_shared";
+import {
+  getAuthenticatedUploadUser,
+  getStorageContextForUploadId,
+} from "../_shared";
 
 export const runtime = "nodejs";
 
@@ -17,22 +21,19 @@ const completeSchema = z.object({
 
 export async function POST(request: Request) {
   try {
-    const context = await getManagedUploadContext(request);
+    const user = await getAuthenticatedUploadUser(request);
 
-    if (!context) {
+    if (!user) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = completeSchema.parse(await request.json());
-
-    const uploadSession = await prisma.uploadSession.findFirst({
-      where: {
-        ownerId: context.userId,
-        uploadId: body.uploadId,
-      },
+    const context = await getStorageContextForUploadId({
+      userId: user.userId,
+      uploadId: body.uploadId,
     });
 
-    if (!uploadSession) {
+    if (!context) {
       return Response.json({ error: "Upload not found" }, { status: 404 });
     }
 
@@ -41,8 +42,8 @@ export async function POST(request: Request) {
     const completedUpload = await context.s3Client.send(
       new CompleteMultipartUploadCommand({
         Bucket: context.bucketName,
-        Key: uploadSession.key,
-        UploadId: uploadSession.uploadId,
+        Key: context.uploadSession.key,
+        UploadId: context.uploadSession.uploadId,
         MultipartUpload: {
           Parts: sortedParts.map((part) => ({
             ETag: part.etag,
@@ -52,29 +53,39 @@ export async function POST(request: Request) {
       }),
     );
 
-    await prisma.driveObject.create({
-      data: {
-        ownerId: context.userId,
-        connectionId: context.managedConnection.id,
-        key: uploadSession.key,
-        name: uploadSession.fileName,
-        type: "file",
-        mimeType: uploadSession.mimeType,
-        size: uploadSession.size,
-        etag: completedUpload.ETag ?? null,
-        path: uploadSession.folderPath,
-      },
-    });
+    if (context.connection.type === "managed") {
+      await prisma.driveObject.create({
+        data: {
+          ownerId: context.userId,
+          connectionId: context.connection.id,
+          key: context.uploadSession.key,
+          name: context.uploadSession.fileName,
+          type: "file",
+          mimeType: context.uploadSession.mimeType,
+          size: context.uploadSession.size,
+          etag: completedUpload.ETag ?? null,
+          path: context.uploadSession.folderPath,
+        },
+      });
+    }
 
-    await prisma.uploadSession.delete({ where: { id: uploadSession.id } });
+    await prisma.uploadSession.delete({ where: { id: context.uploadSession.id } });
 
     return Response.json({
       ok: true,
-      key: uploadSession.key,
-      name: uploadSession.fileName,
+      key: context.uploadSession.key,
+      name: context.uploadSession.fileName,
     });
   } catch (error) {
     console.error("uploads/complete route error", error);
+
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      return Response.json(
+        { error: "A file with that name already exists in this folder" },
+        { status: 409 },
+      );
+    }
+
     return Response.json(
       { error: error instanceof Error ? error.message : "Complete upload failed" },
       { status: 500 },

@@ -1,7 +1,10 @@
 import { auth } from "@/utils/auth";
 import { prisma } from "@/utils/prisma";
-import { signGetObjectUrl } from "@/utils/s3";
-import { getOrCreateManagedConnection } from "@/utils/storage";
+import { createS3ClientForConnection, signGetObjectUrl } from "@/utils/s3";
+import {
+  getObjectNameFromKey,
+  getStorageConnectionWithCredentialsForUser,
+} from "@/utils/storage";
 
 export const runtime = "nodejs";
 
@@ -15,33 +18,53 @@ export async function GET(request: Request) {
 
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
+    const connectionId = searchParams.get("connectionId");
+    const rawKey = searchParams.get("key");
 
-    if (!id) {
-      return Response.json({ error: "Missing file id" }, { status: 400 });
-    }
+    let key: string;
+    let name: string;
+    let connection;
 
-    const object = await prisma.driveObject.findFirst({
-      where: {
-        id,
-        ownerId: session.user.id,
-        type: "file",
-      },
-    });
+    if (id) {
+      const object = await prisma.driveObject.findFirst({
+        where: {
+          id,
+          ownerId: session.user.id,
+          type: "file",
+        },
+      });
 
-    if (!object) {
-      return Response.json({ error: "File not found" }, { status: 404 });
-    }
+      if (!object) {
+        return Response.json({ error: "File not found" }, { status: 404 });
+      }
 
-    const connection = await getOrCreateManagedConnection(session.user.id);
+      connection = await getStorageConnectionWithCredentialsForUser(
+        session.user.id,
+        object.connectionId,
+      );
+      key = object.key;
+      name = object.name;
+    } else {
+      if (!connectionId || !rawKey) {
+        return Response.json(
+          { error: "Missing file reference" },
+          { status: 400 },
+        );
+      }
 
-    if (connection.id !== object.connectionId) {
-      return Response.json({ error: "Unsupported storage connection" }, { status: 400 });
+      connection = await getStorageConnectionWithCredentialsForUser(
+        session.user.id,
+        connectionId,
+      );
+      key = rawKey;
+      name = searchParams.get("name") || getObjectNameFromKey(rawKey);
     }
 
     const downloadUrl = await signGetObjectUrl({
+      client: createS3ClientForConnection(connection),
       bucket: connection.bucketName,
-      key: object.key,
-      fileName: object.name,
+      key,
+      fileName: name,
       contentDisposition: "attachment",
     });
 

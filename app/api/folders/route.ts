@@ -1,11 +1,26 @@
 import { prisma } from "@/utils/prisma";
-import { buildFolderKey, normalizeFileName, normalizeFolderPath } from "@/utils/storage";
+import {
+  buildConnectionFolderKey,
+  buildConnectionObjectKey,
+  normalizeFileName,
+  normalizeFolderPath,
+} from "@/utils/storage";
+import {
+  createS3ClientForConnection,
+  HeadObjectCommand,
+  ListObjectsV2Command,
+  PutObjectCommand,
+} from "@/utils/s3";
 import { z } from "zod";
-import { getManagedUploadContext } from "../uploads/_shared";
+import {
+  getAuthenticatedUploadUser,
+  getStorageContextForConnection,
+} from "../uploads/_shared";
 
 export const runtime = "nodejs";
 
 const createFolderSchema = z.object({
+  connectionId: z.string().optional(),
   name: z
     .string()
     .trim()
@@ -22,60 +37,130 @@ const createFolderSchema = z.object({
 
 export async function POST(request: Request) {
   try {
-    const context = await getManagedUploadContext(request);
+    const user = await getAuthenticatedUploadUser(request);
 
-    if (!context) {
+    if (!user) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = createFolderSchema.parse(await request.json());
+    const context = await getStorageContextForConnection({
+      userId: user.userId,
+      connectionId: body.connectionId,
+    });
     const parentPath = normalizeFolderPath(body.path);
     const folderName = normalizeFileName(body.name);
     const fullPath = parentPath ? `${parentPath}/${folderName}` : folderName;
-    const key = `${buildFolderKey({
-      ownerId: context.userId,
-      rootPrefix: context.managedConnection.rootPrefix,
-      folderPath: fullPath,
-    })}/`;
 
-    const existingObject = await prisma.driveObject.findFirst({
-      where: {
+    if (context.connection.type === "managed") {
+      const key = `${buildConnectionFolderKey({
+        connection: context.connection,
         ownerId: context.userId,
-        connectionId: context.managedConnection.id,
-        OR: [
-          { path: parentPath, name: folderName },
-          { path: fullPath },
-          { path: { startsWith: `${fullPath}/` } },
-        ],
-      },
-    });
+        folderPath: fullPath,
+      })}/`;
 
-    if (existingObject) {
+      const existingObject = await prisma.driveObject.findFirst({
+        where: {
+          ownerId: context.userId,
+          connectionId: context.connection.id,
+          OR: [
+            { path: parentPath, name: folderName },
+            { path: fullPath },
+            { path: { startsWith: `${fullPath}/` } },
+          ],
+        },
+      });
+
+      if (existingObject) {
+        return Response.json(
+          { error: "An item with that folder name already exists" },
+          { status: 409 },
+        );
+      }
+
+      const folder = await prisma.driveObject.create({
+        data: {
+          ownerId: context.userId,
+          connectionId: context.connection.id,
+          key,
+          name: folderName,
+          type: "folder",
+          mimeType: null,
+          size: BigInt(0),
+          path: parentPath,
+        },
+      });
+
+      return Response.json({
+        ok: true,
+        folder: {
+          id: folder.id,
+          name: folder.name,
+          path: folder.path,
+          fullPath,
+        },
+      });
+    }
+
+    const client = createS3ClientForConnection(context.connection);
+    const fileKey = buildConnectionObjectKey({
+      connection: context.connection,
+      ownerId: context.userId,
+      folderPath: parentPath,
+      fileName: folderName,
+    });
+    const folderKey = buildConnectionFolderKey({
+      connection: context.connection,
+      ownerId: context.userId,
+      folderPath: fullPath,
+    });
+    const folderMarkerKey = `${folderKey}/`;
+
+    try {
+      await client.send(
+        new HeadObjectCommand({
+          Bucket: context.bucketName,
+          Key: fileKey,
+        }),
+      );
+
+      return Response.json(
+        { error: "An item with that folder name already exists" },
+        { status: 409 },
+      );
+    } catch {
+      // Ignore not found.
+    }
+
+    const existingFolder = await client.send(
+      new ListObjectsV2Command({
+        Bucket: context.bucketName,
+        Prefix: folderMarkerKey,
+        MaxKeys: 1,
+      }),
+    );
+
+    if ((existingFolder.KeyCount ?? 0) > 0) {
       return Response.json(
         { error: "An item with that folder name already exists" },
         { status: 409 },
       );
     }
 
-    const folder = await prisma.driveObject.create({
-      data: {
-        ownerId: context.userId,
-        connectionId: context.managedConnection.id,
-        key,
-        name: folderName,
-        type: "folder",
-        mimeType: null,
-        size: BigInt(0),
-        path: parentPath,
-      },
-    });
+    await client.send(
+      new PutObjectCommand({
+        Bucket: context.bucketName,
+        Key: folderMarkerKey,
+        Body: "",
+      }),
+    );
 
     return Response.json({
       ok: true,
       folder: {
-        id: folder.id,
-        name: folder.name,
-        path: folder.path,
+        id: `folder:${context.connection.id}:${fullPath}`,
+        name: folderName,
+        path: parentPath,
         fullPath,
       },
     });

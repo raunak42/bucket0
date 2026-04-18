@@ -1,57 +1,157 @@
-import { DeleteObjectsCommand } from "@aws-sdk/client-s3";
+import { auth } from "@/utils/auth";
 import { prisma } from "@/utils/prisma";
-import { normalizeFolderPath } from "@/utils/storage";
+import {
+  createS3ClientForConnection,
+  DeleteObjectsCommand,
+  ListObjectsV2Command,
+} from "@/utils/s3";
+import {
+  buildConnectionFolderKey,
+  getStorageConnectionWithCredentialsForUser,
+  normalizeFolderPath,
+} from "@/utils/storage";
 import { z } from "zod";
-import { getManagedUploadContext } from "../../uploads/_shared";
 
 export const runtime = "nodejs";
 
 const deleteSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("file"),
-    id: z.string().min(1),
+    id: z.string().min(1).optional(),
+    key: z.string().min(1).optional(),
+    connectionId: z.string().min(1).optional(),
+  }).refine((value) => Boolean(value.id || (value.key && value.connectionId)), {
+    message: "File delete requires either id or connectionId + key",
   }),
   z.object({
     type: z.literal("folder"),
     fullPath: z.string().min(1),
+    connectionId: z.string().min(1).optional(),
   }),
 ]);
 
+async function deleteExternalFolder({
+  userId,
+  connectionId,
+  fullPath,
+}: {
+  userId: string;
+  connectionId: string;
+  fullPath: string;
+}) {
+  const connection = await getStorageConnectionWithCredentialsForUser(
+    userId,
+    connectionId,
+  );
+  const client = createS3ClientForConnection(connection);
+  const folderKey = buildConnectionFolderKey({
+    connection,
+    ownerId: userId,
+    folderPath: fullPath,
+  });
+  const prefix = folderKey ? `${folderKey}/` : undefined;
+  const keys: string[] = [];
+  let continuationToken: string | undefined;
+
+  do {
+    const page = await client.send(
+      new ListObjectsV2Command({
+        Bucket: connection.bucketName,
+        Prefix: prefix,
+        ContinuationToken: continuationToken,
+      }),
+    );
+
+    for (const object of page.Contents ?? []) {
+      if (object.Key) {
+        keys.push(object.Key);
+      }
+    }
+
+    continuationToken = page.IsTruncated ? page.NextContinuationToken : undefined;
+  } while (continuationToken);
+
+  if (keys.length === 0) {
+    return { ok: false as const, status: 404, error: "Folder not found" };
+  }
+
+  for (let index = 0; index < keys.length; index += 1000) {
+    const chunk = keys.slice(index, index + 1000);
+
+    await client.send(
+      new DeleteObjectsCommand({
+        Bucket: connection.bucketName,
+        Delete: {
+          Objects: chunk.map((key) => ({ Key: key })),
+          Quiet: true,
+        },
+      }),
+    );
+  }
+
+  return { ok: true as const, deletedCount: keys.length };
+}
+
 export async function POST(request: Request) {
   try {
-    const context = await getManagedUploadContext(request);
+    const session = await auth.api.getSession({ headers: request.headers });
 
-    if (!context) {
+    if (!session?.user?.id) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const body = deleteSchema.parse(await request.json());
 
     if (body.type === "file") {
-      const object = await prisma.driveObject.findFirst({
-        where: {
-          id: body.id,
-          ownerId: context.userId,
-          connectionId: context.managedConnection.id,
-          type: "file",
-        },
-      });
+      if (body.id) {
+        const object = await prisma.driveObject.findFirst({
+          where: {
+            id: body.id,
+            ownerId: session.user.id,
+            type: "file",
+          },
+        });
 
-      if (!object) {
-        return Response.json({ error: "File not found" }, { status: 404 });
+        if (!object) {
+          return Response.json({ error: "File not found" }, { status: 404 });
+        }
+
+        const connection = await getStorageConnectionWithCredentialsForUser(
+          session.user.id,
+          object.connectionId,
+        );
+        const client = createS3ClientForConnection(connection);
+
+        await client.send(
+          new DeleteObjectsCommand({
+            Bucket: connection.bucketName,
+            Delete: {
+              Objects: [{ Key: object.key }],
+              Quiet: true,
+            },
+          }),
+        );
+
+        await prisma.driveObject.delete({ where: { id: object.id } });
+
+        return Response.json({ ok: true });
       }
 
-      await context.s3Client.send(
+      const connection = await getStorageConnectionWithCredentialsForUser(
+        session.user.id,
+        body.connectionId,
+      );
+      const client = createS3ClientForConnection(connection);
+
+      await client.send(
         new DeleteObjectsCommand({
-          Bucket: context.bucketName,
+          Bucket: connection.bucketName,
           Delete: {
-            Objects: [{ Key: object.key }],
+            Objects: [{ Key: body.key! }],
             Quiet: true,
           },
         }),
       );
-
-      await prisma.driveObject.delete({ where: { id: object.id } });
 
       return Response.json({ ok: true });
     }
@@ -61,59 +161,77 @@ export async function POST(request: Request) {
       return Response.json({ error: "Cannot delete root folder" }, { status: 400 });
     }
 
-    const segments = fullPath.split("/").filter(Boolean);
-    const folderName = segments.at(-1);
-    const parentPath = segments.slice(0, -1).join("/");
+    if (!body.connectionId) {
+      const segments = fullPath.split("/").filter(Boolean);
+      const folderName = segments.at(-1);
+      const parentPath = segments.slice(0, -1).join("/");
 
-    if (!folderName) {
-      return Response.json({ error: "Invalid folder path" }, { status: 400 });
-    }
-
-    const objects = await prisma.driveObject.findMany({
-      where: {
-        ownerId: context.userId,
-        connectionId: context.managedConnection.id,
-        OR: [
-          {
-            type: "folder",
-            path: parentPath,
-            name: folderName,
-          },
-          { path: fullPath },
-          { path: { startsWith: `${fullPath}/` } },
-        ],
-      },
-    });
-
-    if (objects.length === 0) {
-      return Response.json({ error: "Folder not found" }, { status: 404 });
-    }
-
-    const keys = [...new Set(objects.map((object) => object.key).filter(Boolean))];
-
-    if (keys.length > 0) {
-      for (let index = 0; index < keys.length; index += 1000) {
-        const chunk = keys.slice(index, index + 1000);
-
-        await context.s3Client.send(
-          new DeleteObjectsCommand({
-            Bucket: context.bucketName,
-            Delete: {
-              Objects: chunk.map((key) => ({ Key: key })),
-              Quiet: true,
-            },
-          }),
-        );
+      if (!folderName) {
+        return Response.json({ error: "Invalid folder path" }, { status: 400 });
       }
+
+      const managedConnection = await getStorageConnectionWithCredentialsForUser(
+        session.user.id,
+      );
+      const objects = await prisma.driveObject.findMany({
+        where: {
+          ownerId: session.user.id,
+          connectionId: managedConnection.id,
+          OR: [
+            {
+              type: "folder",
+              path: parentPath,
+              name: folderName,
+            },
+            { path: fullPath },
+            { path: { startsWith: `${fullPath}/` } },
+          ],
+        },
+      });
+
+      if (objects.length === 0) {
+        return Response.json({ error: "Folder not found" }, { status: 404 });
+      }
+
+      const keys = [...new Set(objects.map((object) => object.key).filter(Boolean))];
+      const client = createS3ClientForConnection(managedConnection);
+
+      if (keys.length > 0) {
+        for (let index = 0; index < keys.length; index += 1000) {
+          const chunk = keys.slice(index, index + 1000);
+
+          await client.send(
+            new DeleteObjectsCommand({
+              Bucket: managedConnection.bucketName,
+              Delete: {
+                Objects: chunk.map((key) => ({ Key: key })),
+                Quiet: true,
+              },
+            }),
+          );
+        }
+      }
+
+      await prisma.driveObject.deleteMany({
+        where: {
+          id: { in: objects.map((object) => object.id) },
+        },
+      });
+
+      return Response.json({ ok: true, deletedCount: objects.length });
     }
 
-    await prisma.driveObject.deleteMany({
-      where: {
-        id: { in: objects.map((object) => object.id) },
-      },
+    const result = await deleteExternalFolder({
+      userId: session.user.id,
+      connectionId: body.connectionId,
+      fullPath,
     });
 
-    return Response.json({ ok: true, deletedCount: objects.length });
+    if (!result.ok) {
+      return Response.json({ error: result.error }, { status: result.status });
+    }
+
+    return Response.json({ ok: true, deletedCount: result.deletedCount });
   } catch (error) {
     console.error("file delete route error", error);
     return Response.json(

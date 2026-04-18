@@ -1,7 +1,15 @@
 import { auth } from "@/utils/auth";
 import { prisma } from "@/utils/prisma";
-import { S3_SIGNED_URL_TTL_SECONDS, signGetObjectUrl } from "@/utils/s3";
-import { getOrCreateManagedConnection } from "@/utils/storage";
+import {
+  createS3ClientForConnection,
+  HeadObjectCommand,
+  S3_SIGNED_URL_TTL_SECONDS,
+  signGetObjectUrl,
+} from "@/utils/s3";
+import {
+  getObjectNameFromKey,
+  getStorageConnectionWithCredentialsForUser,
+} from "@/utils/storage";
 
 export const runtime = "nodejs";
 
@@ -15,52 +23,93 @@ export async function GET(request: Request) {
 
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
+    const connectionId = searchParams.get("connectionId");
+    const rawKey = searchParams.get("key");
 
-    if (!id) {
-      return Response.json({ error: "Missing file id" }, { status: 400 });
+    let key: string;
+    let name: string;
+    let mimeType: string | null = null;
+    let size = "0";
+    let updatedAt = new Date().toISOString();
+    let connection;
+
+    if (id) {
+      const object = await prisma.driveObject.findFirst({
+        where: {
+          id,
+          ownerId: session.user.id,
+          type: "file",
+        },
+      });
+
+      if (!object) {
+        return Response.json({ error: "File not found" }, { status: 404 });
+      }
+
+      connection = await getStorageConnectionWithCredentialsForUser(
+        session.user.id,
+        object.connectionId,
+      );
+      key = object.key;
+      name = object.name;
+      mimeType = object.mimeType;
+      size = object.size.toString();
+      updatedAt = object.updatedAt.toISOString();
+    } else {
+      if (!connectionId || !rawKey) {
+        return Response.json(
+          { error: "Missing file reference" },
+          { status: 400 },
+        );
+      }
+
+      connection = await getStorageConnectionWithCredentialsForUser(
+        session.user.id,
+        connectionId,
+      );
+      key = rawKey;
+      name = searchParams.get("name") || getObjectNameFromKey(rawKey);
+
+      const client = createS3ClientForConnection(connection);
+      const head = await client.send(
+        new HeadObjectCommand({
+          Bucket: connection.bucketName,
+          Key: rawKey,
+        }),
+      );
+
+      mimeType = head.ContentType ?? null;
+      size = String(head.ContentLength ?? 0);
+      updatedAt = (head.LastModified ?? new Date()).toISOString();
     }
 
-    const object = await prisma.driveObject.findFirst({
-      where: {
-        id,
-        ownerId: session.user.id,
-        type: "file",
-      },
-    });
-
-    if (!object) {
-      return Response.json({ error: "File not found" }, { status: 404 });
-    }
-
-    const connection = await getOrCreateManagedConnection(session.user.id);
-
-    if (connection.id !== object.connectionId) {
-      return Response.json({ error: "Unsupported storage connection" }, { status: 400 });
-    }
+    const client = createS3ClientForConnection(connection);
 
     const previewUrl = await signGetObjectUrl({
+      client,
       bucket: connection.bucketName,
-      key: object.key,
-      fileName: object.name,
+      key,
+      fileName: name,
       contentDisposition: "inline",
     });
 
     const downloadUrl = await signGetObjectUrl({
+      client,
       bucket: connection.bucketName,
-      key: object.key,
-      fileName: object.name,
+      key,
+      fileName: name,
       contentDisposition: "attachment",
     });
 
     return Response.json({
       ok: true,
       file: {
-        id: object.id,
-        name: object.name,
-        key: object.key,
-        mimeType: object.mimeType,
-        size: object.size.toString(),
-        updatedAt: object.updatedAt,
+        id: id ?? `file:${connection.id}:${key}`,
+        name,
+        key,
+        mimeType,
+        size,
+        updatedAt,
         previewUrl,
         downloadUrl,
         expiresAt: new Date(

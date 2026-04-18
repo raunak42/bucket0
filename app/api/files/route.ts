@@ -1,6 +1,12 @@
 import { auth } from "@/utils/auth";
 import { prisma } from "@/utils/prisma";
-import { getOrCreateManagedConnection, normalizeFolderPath } from "@/utils/storage";
+import { createS3Client, ListObjectsV2Command } from "@/utils/s3";
+import {
+  buildConnectionFolderKey,
+  getStorageConnectionWithCredentialsForUser,
+  normalizeFolderPath,
+  toPublicStorageConnection,
+} from "@/utils/storage";
 
 export const runtime = "nodejs";
 
@@ -13,7 +19,7 @@ type FileItem = {
   fullPath: string;
   mimeType: string | null;
   size: string;
-  updatedAt: Date;
+  updatedAt: Date | null;
 };
 
 type FolderItem = {
@@ -43,11 +49,11 @@ function buildFullPath(parentPath: string, name: string) {
   return parentPath ? `${parentPath}/${name}` : name;
 }
 
-function buildBreadcrumbs(path: string) {
+function buildBreadcrumbs(path: string, rootName: string) {
   const segments = path ? path.split("/") : [];
 
   return [
-    { name: "My Drive", path: "" },
+    { name: rootName, path: "" },
     ...segments.map((segment, index) => ({
       name: segment,
       path: segments.slice(0, index + 1).join("/"),
@@ -61,14 +67,51 @@ function parsePositiveInteger(value: string | null, fallback: number) {
   return parsed;
 }
 
+function getFileExtension(name: string) {
+  return name.split(".").pop()?.toLowerCase() ?? "";
+}
+
+function guessMimeType(name: string) {
+  const extension = getFileExtension(name);
+
+  if (["png", "jpg", "jpeg", "gif", "webp", "svg", "bmp", "avif"].includes(extension)) {
+    return `image/${extension === "jpg" ? "jpeg" : extension}`;
+  }
+
+  if (["mp4", "webm", "mov", "m4v", "avi", "mkv"].includes(extension)) {
+    return `video/${extension === "m4v" ? "mp4" : extension}`;
+  }
+
+  if (["mp3", "wav", "ogg", "m4a", "aac", "flac"].includes(extension)) {
+    return `audio/${extension === "m4a" ? "mp4" : extension}`;
+  }
+
+  if (extension === "pdf") return "application/pdf";
+  if (["txt", "md", "csv", "log"].includes(extension)) return "text/plain";
+  if (["json"].includes(extension)) return "application/json";
+  if (["js", "mjs", "cjs", "ts", "tsx", "jsx"].includes(extension)) return "text/javascript";
+  if (["html", "css", "xml", "yml", "yaml"].includes(extension)) return "text/plain";
+
+  return null;
+}
+
 function getItemCategory(item: DriveListItem): FilterType {
   if (item.type === "folder") return "folder";
 
   const mimeType = item.mimeType?.toLowerCase() ?? "";
+  const extension = getFileExtension(item.name);
 
-  if (mimeType.startsWith("image/")) return "image";
-  if (mimeType.startsWith("video/")) return "video";
-  if (mimeType.startsWith("audio/")) return "audio";
+  if (mimeType.startsWith("image/") || ["png", "jpg", "jpeg", "gif", "webp", "svg", "bmp", "avif"].includes(extension)) {
+    return "image";
+  }
+
+  if (mimeType.startsWith("video/") || ["mp4", "webm", "mov", "m4v", "avi", "mkv"].includes(extension)) {
+    return "video";
+  }
+
+  if (mimeType.startsWith("audio/") || ["mp3", "wav", "ogg", "m4a", "aac", "flac"].includes(extension)) {
+    return "audio";
+  }
 
   if (
     mimeType.startsWith("text/") ||
@@ -79,7 +122,8 @@ function getItemCategory(item: DriveListItem): FilterType {
     mimeType.includes("document") ||
     mimeType.includes("sheet") ||
     mimeType.includes("spreadsheet") ||
-    mimeType.includes("presentation")
+    mimeType.includes("presentation") ||
+    ["pdf", "txt", "md", "csv", "json", "js", "mjs", "cjs", "ts", "tsx", "jsx", "html", "css", "xml", "yml", "yaml"].includes(extension)
   ) {
     return "document";
   }
@@ -123,6 +167,219 @@ function compareItems(a: DriveListItem, b: DriveListItem, sort: SortType) {
   }
 }
 
+async function listManagedItems({
+  ownerId,
+  connectionId,
+  currentPath,
+}: {
+  ownerId: string;
+  connectionId: string;
+  currentPath: string;
+}) {
+  const objects = await prisma.driveObject.findMany({
+    where: {
+      ownerId,
+      connectionId,
+      ...(currentPath
+        ? {
+            OR: [{ path: currentPath }, { path: { startsWith: `${currentPath}/` } }],
+          }
+        : {}),
+    },
+    orderBy: [{ updatedAt: "desc" }, { name: "asc" }],
+  });
+
+  const folders = new Map<string, FolderItem>();
+  const files: FileItem[] = [];
+  const nestedPrefix = currentPath ? `${currentPath}/` : "";
+
+  for (const object of objects) {
+    if (object.type === "folder" && object.path === currentPath) {
+      const folderFullPath = buildFullPath(currentPath, object.name);
+      if (!folders.has(folderFullPath)) {
+        folders.set(folderFullPath, {
+          id: object.id,
+          type: "folder",
+          name: object.name,
+          path: currentPath,
+          fullPath: folderFullPath,
+          updatedAt: object.updatedAt,
+        });
+      }
+      continue;
+    }
+
+    if (object.path === currentPath && object.type === "file") {
+      files.push({
+        id: object.id,
+        type: "file",
+        name: object.name,
+        key: object.key,
+        path: object.path,
+        fullPath: buildFullPath(object.path, object.name),
+        mimeType: object.mimeType,
+        size: object.size.toString(),
+        updatedAt: object.updatedAt,
+      });
+    }
+
+    if (!object.path) {
+      continue;
+    }
+
+    if (currentPath && !object.path.startsWith(nestedPrefix)) {
+      continue;
+    }
+
+    const remainingPath = currentPath
+      ? object.path.slice(nestedPrefix.length)
+      : object.path;
+
+    if (!remainingPath) {
+      continue;
+    }
+
+    const directFolderName = remainingPath.split("/")[0];
+    const folderFullPath = buildFullPath(currentPath, directFolderName);
+
+    if (!folders.has(folderFullPath)) {
+      folders.set(folderFullPath, {
+        id: `folder:${connectionId}:${folderFullPath}`,
+        type: "folder",
+        name: directFolderName,
+        path: currentPath,
+        fullPath: folderFullPath,
+        updatedAt: null,
+      });
+    }
+  }
+
+  return [...folders.values(), ...files];
+}
+
+async function listExternalItems({
+  ownerId,
+  connection,
+  currentPath,
+}: {
+  ownerId: string;
+  connection: Awaited<ReturnType<typeof getStorageConnectionWithCredentialsForUser>>;
+  currentPath: string;
+}) {
+  const client = createS3Client({
+    provider: connection.provider,
+    region: connection.region,
+    endpoint: connection.endpoint,
+    accessKeyId: connection.accessKeyId,
+    secretAccessKey: connection.secretAccessKey,
+  });
+
+  const folderKey = buildConnectionFolderKey({
+    connection,
+    ownerId,
+    folderPath: currentPath,
+  });
+  const prefix = folderKey ? `${folderKey}/` : undefined;
+  const folders = new Map<string, FolderItem>();
+  const files: FileItem[] = [];
+  let continuationToken: string | undefined;
+
+  do {
+    const page = await client.send(
+      new ListObjectsV2Command({
+        Bucket: connection.bucketName,
+        Prefix: prefix,
+        Delimiter: "/",
+        ContinuationToken: continuationToken,
+      }),
+    );
+
+    for (const commonPrefix of page.CommonPrefixes ?? []) {
+      const nextPrefix = commonPrefix.Prefix;
+
+      if (!nextPrefix) {
+        continue;
+      }
+
+      const relativePrefix = prefix ? nextPrefix.slice(prefix.length) : nextPrefix;
+      const folderName = relativePrefix.replace(/\/+$/g, "").split("/")[0];
+
+      if (!folderName) {
+        continue;
+      }
+
+      const folderFullPath = buildFullPath(currentPath, folderName);
+
+      if (!folders.has(folderFullPath)) {
+        folders.set(folderFullPath, {
+          id: `folder:${connection.id}:${folderFullPath}`,
+          type: "folder",
+          name: folderName,
+          path: currentPath,
+          fullPath: folderFullPath,
+          updatedAt: null,
+        });
+      }
+    }
+
+    for (const object of page.Contents ?? []) {
+      if (!object.Key) {
+        continue;
+      }
+
+      const relativeKey = prefix ? object.Key.slice(prefix.length) : object.Key;
+
+      if (!relativeKey) {
+        continue;
+      }
+
+      if (relativeKey.endsWith("/")) {
+        const folderName = relativeKey.replace(/\/+$/g, "").split("/")[0];
+
+        if (!folderName) {
+          continue;
+        }
+
+        const folderFullPath = buildFullPath(currentPath, folderName);
+
+        if (!folders.has(folderFullPath)) {
+          folders.set(folderFullPath, {
+            id: `folder:${connection.id}:${folderFullPath}`,
+            type: "folder",
+            name: folderName,
+            path: currentPath,
+            fullPath: folderFullPath,
+            updatedAt: object.LastModified ?? null,
+          });
+        }
+
+        continue;
+      }
+
+      if (relativeKey.includes("/")) {
+        continue;
+      }
+
+      const name = relativeKey;
+      files.push({
+        id: `file:${connection.id}:${object.Key}`,
+        type: "file",
+        name,
+        key: object.Key,
+        path: currentPath,
+        fullPath: buildFullPath(currentPath, name),
+        mimeType: guessMimeType(name),
+        size: String(object.Size ?? 0),
+        updatedAt: object.LastModified ?? null,
+      });
+    }
+
+    continuationToken = page.IsTruncated ? page.NextContinuationToken : undefined;
+  } while (continuationToken);
+
+  return [...folders.values(), ...files];
+}
+
 export async function GET(request: Request) {
   try {
     const session = await auth.api.getSession({ headers: request.headers });
@@ -138,92 +395,26 @@ export async function GET(request: Request) {
     const sort = (searchParams.get("sort") as SortType | null) ?? "name_asc";
     const page = parsePositiveInteger(searchParams.get("page"), 1);
     const limit = Math.min(parsePositiveInteger(searchParams.get("limit"), DEFAULT_LIMIT), MAX_LIMIT);
+    const connectionId = searchParams.get("connectionId");
     const needle = query.toLowerCase();
 
-    const managedConnection = await getOrCreateManagedConnection(session.user.id);
+    const connection = await getStorageConnectionWithCredentialsForUser(
+      session.user.id,
+      connectionId,
+    );
 
-    const objects = await prisma.driveObject.findMany({
-      where: {
-        ownerId: session.user.id,
-        connectionId: managedConnection.id,
-        ...(currentPath
-          ? {
-              OR: [
-                { path: currentPath },
-                { path: { startsWith: `${currentPath}/` } },
-              ],
-            }
-          : {}),
-      },
-      orderBy: [{ updatedAt: "desc" }, { name: "asc" }],
-    });
-
-    const folders = new Map<string, FolderItem>();
-    const files: FileItem[] = [];
-    const nestedPrefix = currentPath ? `${currentPath}/` : "";
-
-    for (const object of objects) {
-      if (object.type === "folder" && object.path === currentPath) {
-        const folderFullPath = buildFullPath(currentPath, object.name);
-        if (!folders.has(folderFullPath)) {
-          folders.set(folderFullPath, {
-            id: object.id,
-            type: "folder",
-            name: object.name,
-            path: currentPath,
-            fullPath: folderFullPath,
-            updatedAt: object.updatedAt,
-          });
-        }
-        continue;
-      }
-
-      if (object.path === currentPath && object.type === "file") {
-        files.push({
-          id: object.id,
-          type: "file",
-          name: object.name,
-          key: object.key,
-          path: object.path,
-          fullPath: buildFullPath(object.path, object.name),
-          mimeType: object.mimeType,
-          size: object.size.toString(),
-          updatedAt: object.updatedAt,
+    const allItems = connection.type === "managed"
+      ? await listManagedItems({
+          ownerId: session.user.id,
+          connectionId: connection.id,
+          currentPath,
+        })
+      : await listExternalItems({
+          ownerId: session.user.id,
+          connection,
+          currentPath,
         });
-      }
 
-      if (!object.path) {
-        continue;
-      }
-
-      if (currentPath && !object.path.startsWith(nestedPrefix)) {
-        continue;
-      }
-
-      const remainingPath = currentPath
-        ? object.path.slice(nestedPrefix.length)
-        : object.path;
-
-      if (!remainingPath) {
-        continue;
-      }
-
-      const directFolderName = remainingPath.split("/")[0];
-      const folderFullPath = buildFullPath(currentPath, directFolderName);
-
-      if (!folders.has(folderFullPath)) {
-        folders.set(folderFullPath, {
-          id: `folder:${folderFullPath}`,
-          type: "folder",
-          name: directFolderName,
-          path: currentPath,
-          fullPath: folderFullPath,
-          updatedAt: null,
-        });
-      }
-    }
-
-    const allItems = [...folders.values(), ...files];
     const filteredItems = allItems
       .filter((item) => {
         if (filter !== "all" && getItemCategory(item) !== filter) {
@@ -234,7 +425,12 @@ export async function GET(request: Request) {
           return true;
         }
 
-        return [item.name, item.fullPath, item.type, item.type === "file" ? item.mimeType ?? "" : ""]
+        return [
+          item.name,
+          item.fullPath,
+          item.type,
+          item.type === "file" ? item.mimeType ?? "" : "",
+        ]
           .join(" ")
           .toLowerCase()
           .includes(needle);
@@ -255,12 +451,9 @@ export async function GET(request: Request) {
 
     return Response.json({
       ok: true,
-      connection: {
-        id: managedConnection.id,
-        name: managedConnection.name,
-      },
+      connection: toPublicStorageConnection(connection),
       path: currentPath,
-      breadcrumbs: buildBreadcrumbs(currentPath),
+      breadcrumbs: buildBreadcrumbs(currentPath, connection.name),
       items: paginatedItems,
       pagination: {
         page: currentPage,
