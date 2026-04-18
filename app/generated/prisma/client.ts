@@ -47,6 +47,16 @@ export { Prisma }
  */
 export type StorageConnection = Prisma.StorageConnectionModel
 /**
+ * Model DriveObject
+ * 
+ */
+export type DriveObject = Prisma.DriveObjectModel
+/**
+ * Model UploadSession
+ * 
+ */
+export type UploadSession = Prisma.UploadSessionModel
+/**
  * Model User
  * 
  */

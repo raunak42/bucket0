@@ -52,6 +52,8 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   StorageConnection: 'StorageConnection',
+  DriveObject: 'DriveObject',
+  UploadSession: 'UploadSession',
   User: 'User',
   Session: 'Session',
   Account: 'Account',
@@ -92,6 +94,43 @@ export const StorageConnectionScalarFieldEnum = {
 } as const
 
 export type StorageConnectionScalarFieldEnum = (typeof StorageConnectionScalarFieldEnum)[keyof typeof StorageConnectionScalarFieldEnum]
+
+
+export const DriveObjectScalarFieldEnum = {
+  id: 'id',
+  ownerId: 'ownerId',
+  connectionId: 'connectionId',
+  key: 'key',
+  name: 'name',
+  type: 'type',
+  mimeType: 'mimeType',
+  size: 'size',
+  etag: 'etag',
+  path: 'path',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DriveObjectScalarFieldEnum = (typeof DriveObjectScalarFieldEnum)[keyof typeof DriveObjectScalarFieldEnum]
+
+
+export const UploadSessionScalarFieldEnum = {
+  id: 'id',
+  ownerId: 'ownerId',
+  connectionId: 'connectionId',
+  key: 'key',
+  folderPath: 'folderPath',
+  fileName: 'fileName',
+  mimeType: 'mimeType',
+  size: 'size',
+  uploadId: 'uploadId',
+  partSize: 'partSize',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type UploadSessionScalarFieldEnum = (typeof UploadSessionScalarFieldEnum)[keyof typeof UploadSessionScalarFieldEnum]
 
 
 export const UserScalarFieldEnum = {

@@ -7,9 +7,12 @@
     "dev:turbo": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "s3:cors": "node scripts/configure-s3-cors.mjs"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1031.0",
+    "@aws-sdk/s3-request-presigner": "^3.1031.0",
     "@prisma/client": "^7.7.0",
     "@prisma/extension-accelerate": "^3.0.1",
     "better-auth": "^1.6.5",

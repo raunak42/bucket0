@@ -23,3 +23,21 @@ export const StorageProvider = {
 } as const
 
 export type StorageProvider = (typeof StorageProvider)[keyof typeof StorageProvider]
+
+
+export const DriveObjectType = {
+  file: 'file',
+  folder: 'folder'
+} as const
+
+export type DriveObjectType = (typeof DriveObjectType)[keyof typeof DriveObjectType]
+
+
+export const UploadSessionStatus = {
+  initiated: 'initiated',
+  uploading: 'uploading',
+  completed: 'completed',
+  aborted: 'aborted'
+} as const
+
+export type UploadSessionStatus = (typeof UploadSessionStatus)[keyof typeof UploadSessionStatus]

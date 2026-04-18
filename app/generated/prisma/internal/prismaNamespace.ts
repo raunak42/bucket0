@@ -385,6 +385,8 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 export const ModelName = {
   StorageConnection: 'StorageConnection',
+  DriveObject: 'DriveObject',
+  UploadSession: 'UploadSession',
   User: 'User',
   Session: 'Session',
   Account: 'Account',
@@ -404,7 +406,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "storageConnection" | "user" | "session" | "account" | "verification"
+    modelProps: "storageConnection" | "driveObject" | "uploadSession" | "user" | "session" | "account" | "verification"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -479,6 +481,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.StorageConnectionCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.StorageConnectionCountAggregateOutputType> | number
+        }
+      }
+    }
+    DriveObject: {
+      payload: Prisma.$DriveObjectPayload<ExtArgs>
+      fields: Prisma.DriveObjectFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DriveObjectFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DriveObjectPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DriveObjectFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DriveObjectPayload>
+        }
+        findFirst: {
+          args: Prisma.DriveObjectFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DriveObjectPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DriveObjectFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DriveObjectPayload>
+        }
+        findMany: {
+          args: Prisma.DriveObjectFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DriveObjectPayload>[]
+        }
+        create: {
+          args: Prisma.DriveObjectCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DriveObjectPayload>
+        }
+        createMany: {
+          args: Prisma.DriveObjectCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.DriveObjectCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DriveObjectPayload>[]
+        }
+        delete: {
+          args: Prisma.DriveObjectDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DriveObjectPayload>
+        }
+        update: {
+          args: Prisma.DriveObjectUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DriveObjectPayload>
+        }
+        deleteMany: {
+          args: Prisma.DriveObjectDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DriveObjectUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.DriveObjectUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DriveObjectPayload>[]
+        }
+        upsert: {
+          args: Prisma.DriveObjectUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DriveObjectPayload>
+        }
+        aggregate: {
+          args: Prisma.DriveObjectAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDriveObject>
+        }
+        groupBy: {
+          args: Prisma.DriveObjectGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DriveObjectGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DriveObjectCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DriveObjectCountAggregateOutputType> | number
+        }
+      }
+    }
+    UploadSession: {
+      payload: Prisma.$UploadSessionPayload<ExtArgs>
+      fields: Prisma.UploadSessionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.UploadSessionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UploadSessionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.UploadSessionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UploadSessionPayload>
+        }
+        findFirst: {
+          args: Prisma.UploadSessionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UploadSessionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.UploadSessionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UploadSessionPayload>
+        }
+        findMany: {
+          args: Prisma.UploadSessionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UploadSessionPayload>[]
+        }
+        create: {
+          args: Prisma.UploadSessionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UploadSessionPayload>
+        }
+        createMany: {
+          args: Prisma.UploadSessionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.UploadSessionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UploadSessionPayload>[]
+        }
+        delete: {
+          args: Prisma.UploadSessionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UploadSessionPayload>
+        }
+        update: {
+          args: Prisma.UploadSessionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UploadSessionPayload>
+        }
+        deleteMany: {
+          args: Prisma.UploadSessionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.UploadSessionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.UploadSessionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UploadSessionPayload>[]
+        }
+        upsert: {
+          args: Prisma.UploadSessionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UploadSessionPayload>
+        }
+        aggregate: {
+          args: Prisma.UploadSessionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateUploadSession>
+        }
+        groupBy: {
+          args: Prisma.UploadSessionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UploadSessionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.UploadSessionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UploadSessionCountAggregateOutputType> | number
         }
       }
     }
@@ -837,6 +987,43 @@ export const StorageConnectionScalarFieldEnum = {
 export type StorageConnectionScalarFieldEnum = (typeof StorageConnectionScalarFieldEnum)[keyof typeof StorageConnectionScalarFieldEnum]
 
 
+export const DriveObjectScalarFieldEnum = {
+  id: 'id',
+  ownerId: 'ownerId',
+  connectionId: 'connectionId',
+  key: 'key',
+  name: 'name',
+  type: 'type',
+  mimeType: 'mimeType',
+  size: 'size',
+  etag: 'etag',
+  path: 'path',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DriveObjectScalarFieldEnum = (typeof DriveObjectScalarFieldEnum)[keyof typeof DriveObjectScalarFieldEnum]
+
+
+export const UploadSessionScalarFieldEnum = {
+  id: 'id',
+  ownerId: 'ownerId',
+  connectionId: 'connectionId',
+  key: 'key',
+  folderPath: 'folderPath',
+  fileName: 'fileName',
+  mimeType: 'mimeType',
+  size: 'size',
+  uploadId: 'uploadId',
+  partSize: 'partSize',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type UploadSessionScalarFieldEnum = (typeof UploadSessionScalarFieldEnum)[keyof typeof UploadSessionScalarFieldEnum]
+
+
 export const UserScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -989,6 +1176,34 @@ export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaM
 
 
 /**
+ * Reference to a field of type 'DriveObjectType'
+ */
+export type EnumDriveObjectTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DriveObjectType'>
+    
+
+
+/**
+ * Reference to a field of type 'DriveObjectType[]'
+ */
+export type ListEnumDriveObjectTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DriveObjectType[]'>
+    
+
+
+/**
+ * Reference to a field of type 'BigInt'
+ */
+export type BigIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BigInt'>
+    
+
+
+/**
+ * Reference to a field of type 'BigInt[]'
+ */
+export type ListBigIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BigInt[]'>
+    
+
+
+/**
  * Reference to a field of type 'Int'
  */
 export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
@@ -999,6 +1214,34 @@ export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'In
  * Reference to a field of type 'Int[]'
  */
 export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+/**
+ * Reference to a field of type 'UploadSessionStatus'
+ */
+export type EnumUploadSessionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'UploadSessionStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'UploadSessionStatus[]'
+ */
+export type ListEnumUploadSessionStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'UploadSessionStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Float'
+ */
+export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+    
+
+
+/**
+ * Reference to a field of type 'Float[]'
+ */
+export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
     
 
 /**
@@ -1097,6 +1340,8 @@ export type PrismaClientOptions = ({
 }
 export type GlobalOmitConfig = {
   storageConnection?: Prisma.StorageConnectionOmit
+  driveObject?: Prisma.DriveObjectOmit
+  uploadSession?: Prisma.UploadSessionOmit
   user?: Prisma.UserOmit
   session?: Prisma.SessionOmit
   account?: Prisma.AccountOmit

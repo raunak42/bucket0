@@ -18,8 +18,20 @@ enum StorageProvider {
   s3
 }
 
+enum DriveObjectType {
+  file
+  folder
+}
+
+enum UploadSessionStatus {
+  initiated
+  uploading
+  completed
+  aborted
+}
+
 model StorageConnection {
-  id           String                @id @default(cuid())
+  id           String   @id @default(cuid())
   ownerId      String
   name         String
   type         StorageConnectionType
@@ -27,14 +39,55 @@ model StorageConnection {
   bucketName   String
   region       String?
   endpoint     String?
-  rootPrefix   String                @default("")
+  rootPrefix   String   @default("")
   accessKeyEnc String?
   secretKeyEnc String?
-  isDefault    Boolean               @default(false)
-  createdAt    DateTime              @default(now())
-  updatedAt    DateTime              @updatedAt
+  isDefault    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   @@index([ownerId])
+}
+
+model DriveObject {
+  id           String          @id @default(cuid())
+  ownerId      String
+  connectionId String
+  key          String
+  name         String
+  type         DriveObjectType
+  mimeType     String?
+  size         BigInt          @default(0)
+  etag         String?
+  path         String          @default("")
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  @@index([ownerId])
+  @@index([connectionId])
+  @@index([ownerId, path])
+  @@unique([connectionId, key])
+}
+
+model UploadSession {
+  id           String              @id @default(cuid())
+  ownerId      String
+  connectionId String
+  key          String
+  folderPath   String              @default("")
+  fileName     String
+  mimeType     String
+  size         BigInt
+  uploadId     String
+  partSize     Int
+  status       UploadSessionStatus @default(initiated)
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  @@index([ownerId])
+  @@index([connectionId])
+  @@index([ownerId, status])
+  @@unique([uploadId])
 }
 
 model User {
