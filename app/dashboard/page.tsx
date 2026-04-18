@@ -12,5 +12,11 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  return <DashboardClient userName={session.user.name || session.user.email} />;
+  return (
+    <DashboardClient
+      userName={session.user.name || session.user.email}
+      userEmail={session.user.email}
+      userImage={session.user.image ?? null}
+    />
+  );
 }

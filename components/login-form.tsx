@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input"
 import Image from "next/image"
 import { LoaderCircle } from "lucide-react"
 import { useState } from "react"
-import { toast, Toaster } from "react-hot-toast"
+import { toast } from "react-hot-toast"
 import { authClient } from "@/utils/auth-client"
 import { loginSchema } from "@/utils/zod"
 
@@ -24,6 +24,9 @@ type LoginFieldErrors = {
 }
 
 type AuthProvider = "google" | "github"
+
+const LOGIN_ERROR_TOAST_ID = "login-error-toast"
+const LOGIN_PROVIDER_ERROR_TOAST_ID = "login-provider-error-toast"
 
 export function LoginForm({
   className,
@@ -36,28 +39,30 @@ export function LoginForm({
   const loginWithEmail = async (formData: FormData) => {
     if (isSubmitting || providerLoading) return
 
-    setIsSubmitting(true)
     setFieldErrors({})
+    toast.dismiss(LOGIN_ERROR_TOAST_ID)
+
+    const email = String(formData.get("email") ?? "")
+    const password = String(formData.get("password") ?? "")
+
+    const zodResult = loginSchema.safeParse({ email, password })
+    if (!zodResult.success) {
+      const { fieldErrors } = zodResult.error.flatten()
+      const nextFieldErrors: LoginFieldErrors = {
+        email: fieldErrors.email?.[0],
+        password: fieldErrors.password?.[0],
+      }
+
+      setFieldErrors(nextFieldErrors)
+      console.error("Login validation failed", fieldErrors)
+      return
+    }
+
+    setIsSubmitting(true)
     const loadingToast = toast.loading("Signing you in...")
     await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
 
     try {
-      const email = String(formData.get("email") ?? "")
-      const password = String(formData.get("password") ?? "")
-
-      const zodResult = loginSchema.safeParse({ email, password })
-      if (!zodResult.success) {
-        const { fieldErrors } = zodResult.error.flatten()
-        const nextFieldErrors: LoginFieldErrors = {
-          email: fieldErrors.email?.[0],
-          password: fieldErrors.password?.[0],
-        }
-
-        setFieldErrors(nextFieldErrors)
-        console.error("Login validation failed", fieldErrors)
-        return
-      }
-
       const { data, error } = await authClient.signIn.email({
         email: zodResult.data.email,
         password: zodResult.data.password,
@@ -67,7 +72,9 @@ export function LoginForm({
 
       if (error) {
         console.error("Login failed", error)
-        toast.error(error.message || "Could not sign you in.")
+        toast.error(error.message || "Could not sign you in.", {
+          id: LOGIN_ERROR_TOAST_ID,
+        })
         return
       }
 
@@ -76,7 +83,9 @@ export function LoginForm({
       }
     } catch (error) {
       console.error("Unexpected login error", error)
-      toast.error("Something went wrong while signing you in.")
+      toast.error("Something went wrong while signing you in.", {
+        id: LOGIN_ERROR_TOAST_ID,
+      })
     } finally {
       toast.dismiss(loadingToast)
       setIsSubmitting(false)
@@ -87,6 +96,7 @@ export function LoginForm({
     if (isSubmitting || providerLoading) return
 
     setProviderLoading(provider)
+    toast.dismiss(LOGIN_PROVIDER_ERROR_TOAST_ID)
 
     try {
       await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
@@ -98,11 +108,15 @@ export function LoginForm({
 
       if (error) {
         console.error(`${provider} sign-in failed`, error)
-        toast.error(error.message || `Could not sign in with ${provider}.`)
+        toast.error(error.message || `Could not sign in with ${provider}.`, {
+          id: LOGIN_PROVIDER_ERROR_TOAST_ID,
+        })
       }
     } catch (error) {
       console.error(`Unexpected ${provider} sign-in error`, error)
-      toast.error(`Something went wrong while signing in with ${provider}.`)
+      toast.error(`Something went wrong while signing in with ${provider}.`, {
+        id: LOGIN_PROVIDER_ERROR_TOAST_ID,
+      })
     } finally {
       setProviderLoading(null)
     }
@@ -110,7 +124,6 @@ export function LoginForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Toaster position="top-right" />
       <Card className="overflow-hidden p-0">
         <CardContent className="grid p-0 md:grid-cols-2">
           <form

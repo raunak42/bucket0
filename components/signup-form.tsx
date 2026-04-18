@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input"
 import Image from "next/image"
 import { LoaderCircle } from "lucide-react"
 import { useState } from "react"
-import { toast, Toaster } from "react-hot-toast"
+import { toast } from "react-hot-toast"
 import { authClient } from "@/utils/auth-client"
 import { signupSchema } from "@/utils/zod"
 
@@ -25,6 +25,9 @@ type SignupFieldErrors = {
 }
 
 type AuthProvider = "google" | "github"
+
+const SIGNUP_ERROR_TOAST_ID = "signup-error-toast"
+const SIGNUP_PROVIDER_ERROR_TOAST_ID = "signup-provider-error-toast"
 
 export function SignupForm({
   className,
@@ -37,35 +40,37 @@ export function SignupForm({
   const signupWithEmail = async (formData: FormData) => {
     if (isSubmitting || providerLoading) return
 
-    setIsSubmitting(true)
     setFieldErrors({})
+    toast.dismiss(SIGNUP_ERROR_TOAST_ID)
+
+    const email = String(formData.get("email") ?? "")
+    const password = String(formData.get("password") ?? "")
+    const confirmPassword = String(formData.get("confirm-password") ?? "")
+
+    const zodResult = signupSchema.safeParse({
+      email,
+      password,
+      confirmPassword,
+    })
+
+    if (!zodResult.success) {
+      const { fieldErrors } = zodResult.error.flatten()
+      const nextFieldErrors: SignupFieldErrors = {
+        email: fieldErrors.email?.[0],
+        password: fieldErrors.password?.[0],
+        confirmPassword: fieldErrors.confirmPassword?.[0],
+      }
+
+      setFieldErrors(nextFieldErrors)
+      console.error("Signup validation failed", fieldErrors)
+      return
+    }
+
+    setIsSubmitting(true)
     const loadingToast = toast.loading("Creating your account...")
     await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
 
     try {
-      const email = String(formData.get("email") ?? "")
-      const password = String(formData.get("password") ?? "")
-      const confirmPassword = String(formData.get("confirm-password") ?? "")
-
-      const zodResult = signupSchema.safeParse({
-        email,
-        password,
-        confirmPassword,
-      })
-
-      if (!zodResult.success) {
-        const { fieldErrors } = zodResult.error.flatten()
-        const nextFieldErrors: SignupFieldErrors = {
-          email: fieldErrors.email?.[0],
-          password: fieldErrors.password?.[0],
-          confirmPassword: fieldErrors.confirmPassword?.[0],
-        }
-
-        setFieldErrors(nextFieldErrors)
-        console.error("Signup validation failed", fieldErrors)
-        return
-      }
-
       const { data, error } = await authClient.signUp.email({
         email: zodResult.data.email,
         password: zodResult.data.password,
@@ -75,7 +80,9 @@ export function SignupForm({
 
       if (error) {
         console.error("Signup failed", error)
-        toast.error(error.message || "Could not create your account.")
+        toast.error(error.message || "Could not create your account.", {
+          id: SIGNUP_ERROR_TOAST_ID,
+        })
         return
       }
 
@@ -84,7 +91,9 @@ export function SignupForm({
       }
     } catch (error) {
       console.error("Unexpected signup error", error)
-      toast.error("Something went wrong while creating your account.")
+      toast.error("Something went wrong while creating your account.", {
+        id: SIGNUP_ERROR_TOAST_ID,
+      })
     } finally {
       toast.dismiss(loadingToast)
       setIsSubmitting(false)
@@ -95,6 +104,7 @@ export function SignupForm({
     if (isSubmitting || providerLoading) return
 
     setProviderLoading(provider)
+    toast.dismiss(SIGNUP_PROVIDER_ERROR_TOAST_ID)
 
     try {
       await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
@@ -106,11 +116,15 @@ export function SignupForm({
 
       if (error) {
         console.error(`${provider} sign-in failed`, error)
-        toast.error(error.message || `Could not continue with ${provider}.`)
+        toast.error(error.message || `Could not continue with ${provider}.`, {
+          id: SIGNUP_PROVIDER_ERROR_TOAST_ID,
+        })
       }
     } catch (error) {
       console.error(`Unexpected ${provider} sign-in error`, error)
-      toast.error(`Something went wrong while continuing with ${provider}.`)
+      toast.error(`Something went wrong while continuing with ${provider}.`, {
+        id: SIGNUP_PROVIDER_ERROR_TOAST_ID,
+      })
     } finally {
       setProviderLoading(null)
     }
@@ -118,7 +132,6 @@ export function SignupForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Toaster position="top-right" />
       <Card className="overflow-hidden p-0">
         <CardContent className="grid p-0 md:grid-cols-2">
           <form
