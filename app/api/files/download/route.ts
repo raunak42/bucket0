@@ -60,6 +60,15 @@ export async function GET(request: Request) {
       name = searchParams.get("name") || getObjectNameFromKey(rawKey);
     }
 
+    if (connection.type === "external") {
+      const contentUrl = new URL("/api/files/content", request.url);
+      contentUrl.searchParams.set("connectionId", connection.id);
+      contentUrl.searchParams.set("key", key);
+      contentUrl.searchParams.set("name", name);
+      contentUrl.searchParams.set("disposition", "attachment");
+      return Response.redirect(contentUrl, 307);
+    }
+
     const downloadUrl = await signGetObjectUrl({
       client: createS3ClientForConnection(connection),
       bucket: connection.bucketName,

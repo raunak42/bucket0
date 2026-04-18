@@ -132,15 +132,17 @@ type InitUploadResponse =
   | {
       ok: true;
       mode: "simple";
+      transport: "direct" | "proxy";
       uploadId: string;
       key: string;
       bucketName: string;
-      uploadUrl: string;
+      uploadUrl?: string;
       fileName?: string;
     }
   | {
       ok: true;
       mode: "multipart";
+      transport: "direct" | "proxy";
       uploadId: string;
       key: string;
       bucketName: string;
@@ -819,14 +821,18 @@ async function uploadBlobWithProgress({
   contentType,
   onProgress,
   signal,
+  method = "PUT",
+  expectJson = false,
 }: {
   url: string;
   file: Blob;
   contentType?: string;
   onProgress?: (loaded: number, total: number) => void;
   signal?: AbortSignal;
+  method?: "PUT" | "POST";
+  expectJson?: boolean;
 }) {
-  return new Promise<{ etag: string | null }>((resolve, reject) => {
+  return new Promise<{ etag: string | null; data: Record<string, unknown> | null }>((resolve, reject) => {
     if (signal?.aborted) {
       reject(createAbortError());
       return;
@@ -853,7 +859,7 @@ async function uploadBlobWithProgress({
       request.abort();
     };
 
-    request.open("PUT", url);
+    request.open(method, url);
 
     if (contentType) {
       request.setRequestHeader("Content-Type", contentType);
@@ -869,15 +875,42 @@ async function uploadBlobWithProgress({
       finish(() => {
         if (request.status >= 200 && request.status < 300) {
           onProgress?.(file.size, file.size);
+
+          let data: Record<string, unknown> | null = null;
+          if (expectJson && request.responseText) {
+            try {
+              data = JSON.parse(request.responseText) as Record<string, unknown>;
+            } catch {
+              data = null;
+            }
+          }
+
           resolve({
             etag:
+              (typeof data?.etag === "string" ? data.etag : null) ??
               request.getResponseHeader("etag") ??
               request.getResponseHeader("ETag"),
+            data,
           });
           return;
         }
 
-        reject(new Error("Upload request failed"));
+        let errorMessage = "Upload request failed";
+
+        if (request.responseText) {
+          try {
+            const parsed = JSON.parse(request.responseText) as { error?: string };
+            if (parsed?.error) {
+              errorMessage = parsed.error;
+            }
+          } catch {
+            if (request.responseText.trim()) {
+              errorMessage = request.responseText.trim();
+            }
+          }
+        }
+
+        reject(new Error(errorMessage));
       });
     };
 
@@ -899,11 +932,16 @@ async function uploadSimpleFile(
   for (let attempt = 0; attempt <= SIMPLE_UPLOAD_RETRY_COUNT; attempt += 1) {
     try {
       await uploadBlobWithProgress({
-        url: initData.uploadUrl,
+        url:
+          initData.transport === "direct"
+            ? initData.uploadUrl ?? ""
+            : `/api/uploads/proxy-simple?${new URLSearchParams({ uploadId: initData.uploadId }).toString()}`,
         file,
         contentType: file.type || "application/octet-stream",
         onProgress,
         signal,
+        method: initData.transport === "direct" ? "PUT" : "POST",
+        expectJson: initData.transport === "proxy",
       });
       lastError = null;
       break;
@@ -959,37 +997,56 @@ async function uploadMultipartFile(
     const end = Math.min(start + initData.partSize, file.size);
     const chunk = file.slice(start, end);
 
-    const partUrlResponse = await fetch("/api/uploads/part-url", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        uploadId: initData.uploadId,
-        partNumber,
-      }),
-      signal,
-    });
+    let uploadResult: { etag: string | null; data: Record<string, unknown> | null };
 
-    if (!partUrlResponse.ok) {
-      const errorData = (await partUrlResponse.json().catch(() => null)) as
-        | { error?: string }
-        | null;
-      throw new Error(
-        errorData?.error || `Could not get URL for part ${partNumber}`,
-      );
+    if (initData.transport === "direct") {
+      const partUrlResponse = await fetch("/api/uploads/part-url", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          uploadId: initData.uploadId,
+          partNumber,
+        }),
+        signal,
+      });
+
+      if (!partUrlResponse.ok) {
+        const errorData = (await partUrlResponse.json().catch(() => null)) as
+          | { error?: string }
+          | null;
+        throw new Error(
+          errorData?.error || `Could not get URL for part ${partNumber}`,
+        );
+      }
+
+      const partData = (await partUrlResponse.json()) as { uploadUrl: string };
+
+      uploadResult = await uploadBlobWithProgress({
+        url: partData.uploadUrl,
+        file: chunk,
+        onProgress: (loaded) => {
+          onProgress?.(uploadedBytes + loaded, file.size);
+        },
+        signal,
+      });
+    } else {
+      uploadResult = await uploadBlobWithProgress({
+        url: `/api/uploads/proxy-part?${new URLSearchParams({
+          uploadId: initData.uploadId,
+          partNumber: String(partNumber),
+        }).toString()}`,
+        method: "POST",
+        expectJson: true,
+        file: chunk,
+        contentType: "application/octet-stream",
+        onProgress: (loaded) => {
+          onProgress?.(uploadedBytes + loaded, file.size);
+        },
+        signal,
+      });
     }
-
-    const partData = (await partUrlResponse.json()) as { uploadUrl: string };
-
-    const uploadResult = await uploadBlobWithProgress({
-      url: partData.uploadUrl,
-      file: chunk,
-      onProgress: (loaded) => {
-        onProgress?.(uploadedBytes + loaded, file.size);
-      },
-      signal,
-    });
 
     if (!uploadResult.etag) {
       throw new Error(`Missing ETag for part ${partNumber}`);

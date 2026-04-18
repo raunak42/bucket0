@@ -175,12 +175,16 @@ export async function POST(request: Request) {
 
     if (body.size <= SIMPLE_UPLOAD_MAX_BYTES) {
       const uploadId = `simple_${crypto.randomUUID()}`;
-      const uploadUrl = await signPutObjectUploadUrl({
-        client: context.s3Client,
-        bucket: context.bucketName,
-        key,
-        contentType: body.mimeType,
-      });
+      const transport = context.connection.type === "external" ? "proxy" : "direct";
+      const uploadUrl =
+        transport === "direct"
+          ? await signPutObjectUploadUrl({
+              client: context.s3Client,
+              bucket: context.bucketName,
+              key,
+              contentType: body.mimeType,
+            })
+          : undefined;
 
       await prisma.uploadSession.create({
         data: {
@@ -200,10 +204,11 @@ export async function POST(request: Request) {
       return Response.json({
         ok: true,
         mode: "simple",
+        transport,
         uploadId,
         key,
         bucketName: context.bucketName,
-        uploadUrl,
+        ...(uploadUrl ? { uploadUrl } : {}),
         fileName,
       });
     }
@@ -241,6 +246,7 @@ export async function POST(request: Request) {
     return Response.json({
       ok: true,
       mode: "multipart",
+      transport: context.connection.type === "external" ? "proxy" : "direct",
       uploadId: upload.UploadId,
       key,
       bucketName: context.bucketName,

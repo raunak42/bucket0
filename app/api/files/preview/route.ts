@@ -85,21 +85,37 @@ export async function GET(request: Request) {
 
     const client = createS3ClientForConnection(connection);
 
-    const previewUrl = await signGetObjectUrl({
-      client,
-      bucket: connection.bucketName,
-      key,
-      fileName: name,
-      contentDisposition: "inline",
-    });
+    const previewUrl =
+      connection.type === "external"
+        ? `/api/files/content?${new URLSearchParams({
+            connectionId: connection.id,
+            key,
+            name,
+            disposition: "inline",
+          }).toString()}`
+        : await signGetObjectUrl({
+            client,
+            bucket: connection.bucketName,
+            key,
+            fileName: name,
+            contentDisposition: "inline",
+          });
 
-    const downloadUrl = await signGetObjectUrl({
-      client,
-      bucket: connection.bucketName,
-      key,
-      fileName: name,
-      contentDisposition: "attachment",
-    });
+    const downloadUrl =
+      connection.type === "external"
+        ? `/api/files/content?${new URLSearchParams({
+            connectionId: connection.id,
+            key,
+            name,
+            disposition: "attachment",
+          }).toString()}`
+        : await signGetObjectUrl({
+            client,
+            bucket: connection.bucketName,
+            key,
+            fileName: name,
+            contentDisposition: "attachment",
+          });
 
     return Response.json({
       ok: true,
