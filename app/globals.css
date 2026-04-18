@@ -117,6 +117,15 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+@keyframes progress-indeterminate {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(320%);
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

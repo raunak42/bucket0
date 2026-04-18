@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { Geist_Mono } from "next/font/google";
+import { AppToaster } from "@/components/app-toaster";
 import "./globals.css";
 
 const sfPro = localFont({
@@ -46,7 +47,10 @@ export default function RootLayout({
       lang="en"
       className={`${sfPro.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <AppToaster />
+        {children}
+      </body>
     </html>
   );
 }
