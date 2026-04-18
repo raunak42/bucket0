@@ -16,6 +16,8 @@ enum StorageConnectionType {
 enum StorageProvider {
   internal
   s3
+  r2
+  wasabi
 }
 
 enum DriveObjectType {
@@ -31,20 +33,24 @@ enum UploadSessionStatus {
 }
 
 model StorageConnection {
-  id           String   @id @default(cuid())
+  id           String          @id @default(cuid())
   ownerId      String
+  owner        User            @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   name         String
   type         StorageConnectionType
   provider     StorageProvider
   bucketName   String
   region       String?
   endpoint     String?
-  rootPrefix   String   @default("")
-  accessKeyEnc String?
-  secretKeyEnc String?
-  isDefault    Boolean  @default(false)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  rootPrefix                String   @default("")
+  accessKeyEnc              String?
+  secretKeyEnc              String?
+  credentialsClientEncrypted Boolean  @default(false)
+  isDefault                 Boolean  @default(false)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  driveObjects DriveObject[]
+  uploadSessions UploadSession[]
 
   @@index([ownerId])
 }
@@ -52,7 +58,9 @@ model StorageConnection {
 model DriveObject {
   id           String          @id @default(cuid())
   ownerId      String
+  owner        User            @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   connectionId String
+  connection   StorageConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
   key          String
   name         String
   type         DriveObjectType
@@ -72,7 +80,9 @@ model DriveObject {
 model UploadSession {
   id           String              @id @default(cuid())
   ownerId      String
+  owner        User                @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   connectionId String
+  connection   StorageConnection   @relation(fields: [connectionId], references: [id], onDelete: Cascade)
   key          String
   folderPath   String              @default("")
   fileName     String
@@ -91,15 +101,18 @@ model UploadSession {
 }
 
 model User {
-  id            String    @id
-  name          String
-  email         String
-  emailVerified Boolean   @default(false)
-  image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  sessions      Session[]
-  accounts      Account[]
+  id                 String              @id
+  name               String
+  email              String
+  emailVerified      Boolean             @default(false)
+  image              String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  sessions           Session[]
+  accounts           Account[]
+  storageConnections StorageConnection[]
+  driveObjects       DriveObject[]
+  uploadSessions     UploadSession[]
 
   @@unique([email])
   @@map("user")

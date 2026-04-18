@@ -272,6 +272,8 @@ export type DriveObjectWhereInput = {
   path?: Prisma.StringFilter<"DriveObject"> | string
   createdAt?: Prisma.DateTimeFilter<"DriveObject"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"DriveObject"> | Date | string
+  owner?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  connection?: Prisma.XOR<Prisma.StorageConnectionScalarRelationFilter, Prisma.StorageConnectionWhereInput>
 }
 
 export type DriveObjectOrderByWithRelationInput = {
@@ -287,6 +289,8 @@ export type DriveObjectOrderByWithRelationInput = {
   path?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  owner?: Prisma.UserOrderByWithRelationInput
+  connection?: Prisma.StorageConnectionOrderByWithRelationInput
 }
 
 export type DriveObjectWhereUniqueInput = Prisma.AtLeast<{
@@ -306,6 +310,8 @@ export type DriveObjectWhereUniqueInput = Prisma.AtLeast<{
   path?: Prisma.StringFilter<"DriveObject"> | string
   createdAt?: Prisma.DateTimeFilter<"DriveObject"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"DriveObject"> | Date | string
+  owner?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  connection?: Prisma.XOR<Prisma.StorageConnectionScalarRelationFilter, Prisma.StorageConnectionWhereInput>
 }, "id" | "connectionId_key">
 
 export type DriveObjectOrderByWithAggregationInput = {
@@ -348,8 +354,6 @@ export type DriveObjectScalarWhereWithAggregatesInput = {
 
 export type DriveObjectCreateInput = {
   id?: string
-  ownerId: string
-  connectionId: string
   key: string
   name: string
   type: $Enums.DriveObjectType
@@ -359,6 +363,8 @@ export type DriveObjectCreateInput = {
   path?: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  owner: Prisma.UserCreateNestedOneWithoutDriveObjectsInput
+  connection: Prisma.StorageConnectionCreateNestedOneWithoutDriveObjectsInput
 }
 
 export type DriveObjectUncheckedCreateInput = {
@@ -378,8 +384,6 @@ export type DriveObjectUncheckedCreateInput = {
 
 export type DriveObjectUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
-  connectionId?: Prisma.StringFieldUpdateOperationsInput | string
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumDriveObjectTypeFieldUpdateOperationsInput | $Enums.DriveObjectType
@@ -389,6 +393,8 @@ export type DriveObjectUpdateInput = {
   path?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  owner?: Prisma.UserUpdateOneRequiredWithoutDriveObjectsNestedInput
+  connection?: Prisma.StorageConnectionUpdateOneRequiredWithoutDriveObjectsNestedInput
 }
 
 export type DriveObjectUncheckedUpdateInput = {
@@ -423,8 +429,6 @@ export type DriveObjectCreateManyInput = {
 
 export type DriveObjectUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
-  connectionId?: Prisma.StringFieldUpdateOperationsInput | string
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumDriveObjectTypeFieldUpdateOperationsInput | $Enums.DriveObjectType
@@ -449,6 +453,16 @@ export type DriveObjectUncheckedUpdateManyInput = {
   path?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type DriveObjectListRelationFilter = {
+  every?: Prisma.DriveObjectWhereInput
+  some?: Prisma.DriveObjectWhereInput
+  none?: Prisma.DriveObjectWhereInput
+}
+
+export type DriveObjectOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type DriveObjectConnectionIdKeyCompoundUniqueInput = {
@@ -509,6 +523,48 @@ export type DriveObjectSumOrderByAggregateInput = {
   size?: Prisma.SortOrder
 }
 
+export type DriveObjectCreateNestedManyWithoutConnectionInput = {
+  create?: Prisma.XOR<Prisma.DriveObjectCreateWithoutConnectionInput, Prisma.DriveObjectUncheckedCreateWithoutConnectionInput> | Prisma.DriveObjectCreateWithoutConnectionInput[] | Prisma.DriveObjectUncheckedCreateWithoutConnectionInput[]
+  connectOrCreate?: Prisma.DriveObjectCreateOrConnectWithoutConnectionInput | Prisma.DriveObjectCreateOrConnectWithoutConnectionInput[]
+  createMany?: Prisma.DriveObjectCreateManyConnectionInputEnvelope
+  connect?: Prisma.DriveObjectWhereUniqueInput | Prisma.DriveObjectWhereUniqueInput[]
+}
+
+export type DriveObjectUncheckedCreateNestedManyWithoutConnectionInput = {
+  create?: Prisma.XOR<Prisma.DriveObjectCreateWithoutConnectionInput, Prisma.DriveObjectUncheckedCreateWithoutConnectionInput> | Prisma.DriveObjectCreateWithoutConnectionInput[] | Prisma.DriveObjectUncheckedCreateWithoutConnectionInput[]
+  connectOrCreate?: Prisma.DriveObjectCreateOrConnectWithoutConnectionInput | Prisma.DriveObjectCreateOrConnectWithoutConnectionInput[]
+  createMany?: Prisma.DriveObjectCreateManyConnectionInputEnvelope
+  connect?: Prisma.DriveObjectWhereUniqueInput | Prisma.DriveObjectWhereUniqueInput[]
+}
+
+export type DriveObjectUpdateManyWithoutConnectionNestedInput = {
+  create?: Prisma.XOR<Prisma.DriveObjectCreateWithoutConnectionInput, Prisma.DriveObjectUncheckedCreateWithoutConnectionInput> | Prisma.DriveObjectCreateWithoutConnectionInput[] | Prisma.DriveObjectUncheckedCreateWithoutConnectionInput[]
+  connectOrCreate?: Prisma.DriveObjectCreateOrConnectWithoutConnectionInput | Prisma.DriveObjectCreateOrConnectWithoutConnectionInput[]
+  upsert?: Prisma.DriveObjectUpsertWithWhereUniqueWithoutConnectionInput | Prisma.DriveObjectUpsertWithWhereUniqueWithoutConnectionInput[]
+  createMany?: Prisma.DriveObjectCreateManyConnectionInputEnvelope
+  set?: Prisma.DriveObjectWhereUniqueInput | Prisma.DriveObjectWhereUniqueInput[]
+  disconnect?: Prisma.DriveObjectWhereUniqueInput | Prisma.DriveObjectWhereUniqueInput[]
+  delete?: Prisma.DriveObjectWhereUniqueInput | Prisma.DriveObjectWhereUniqueInput[]
+  connect?: Prisma.DriveObjectWhereUniqueInput | Prisma.DriveObjectWhereUniqueInput[]
+  update?: Prisma.DriveObjectUpdateWithWhereUniqueWithoutConnectionInput | Prisma.DriveObjectUpdateWithWhereUniqueWithoutConnectionInput[]
+  updateMany?: Prisma.DriveObjectUpdateManyWithWhereWithoutConnectionInput | Prisma.DriveObjectUpdateManyWithWhereWithoutConnectionInput[]
+  deleteMany?: Prisma.DriveObjectScalarWhereInput | Prisma.DriveObjectScalarWhereInput[]
+}
+
+export type DriveObjectUncheckedUpdateManyWithoutConnectionNestedInput = {
+  create?: Prisma.XOR<Prisma.DriveObjectCreateWithoutConnectionInput, Prisma.DriveObjectUncheckedCreateWithoutConnectionInput> | Prisma.DriveObjectCreateWithoutConnectionInput[] | Prisma.DriveObjectUncheckedCreateWithoutConnectionInput[]
+  connectOrCreate?: Prisma.DriveObjectCreateOrConnectWithoutConnectionInput | Prisma.DriveObjectCreateOrConnectWithoutConnectionInput[]
+  upsert?: Prisma.DriveObjectUpsertWithWhereUniqueWithoutConnectionInput | Prisma.DriveObjectUpsertWithWhereUniqueWithoutConnectionInput[]
+  createMany?: Prisma.DriveObjectCreateManyConnectionInputEnvelope
+  set?: Prisma.DriveObjectWhereUniqueInput | Prisma.DriveObjectWhereUniqueInput[]
+  disconnect?: Prisma.DriveObjectWhereUniqueInput | Prisma.DriveObjectWhereUniqueInput[]
+  delete?: Prisma.DriveObjectWhereUniqueInput | Prisma.DriveObjectWhereUniqueInput[]
+  connect?: Prisma.DriveObjectWhereUniqueInput | Prisma.DriveObjectWhereUniqueInput[]
+  update?: Prisma.DriveObjectUpdateWithWhereUniqueWithoutConnectionInput | Prisma.DriveObjectUpdateWithWhereUniqueWithoutConnectionInput[]
+  updateMany?: Prisma.DriveObjectUpdateManyWithWhereWithoutConnectionInput | Prisma.DriveObjectUpdateManyWithWhereWithoutConnectionInput[]
+  deleteMany?: Prisma.DriveObjectScalarWhereInput | Prisma.DriveObjectScalarWhereInput[]
+}
+
 export type EnumDriveObjectTypeFieldUpdateOperationsInput = {
   set?: $Enums.DriveObjectType
 }
@@ -519,6 +575,286 @@ export type BigIntFieldUpdateOperationsInput = {
   decrement?: bigint | number
   multiply?: bigint | number
   divide?: bigint | number
+}
+
+export type DriveObjectCreateNestedManyWithoutOwnerInput = {
+  create?: Prisma.XOR<Prisma.DriveObjectCreateWithoutOwnerInput, Prisma.DriveObjectUncheckedCreateWithoutOwnerInput> | Prisma.DriveObjectCreateWithoutOwnerInput[] | Prisma.DriveObjectUncheckedCreateWithoutOwnerInput[]
+  connectOrCreate?: Prisma.DriveObjectCreateOrConnectWithoutOwnerInput | Prisma.DriveObjectCreateOrConnectWithoutOwnerInput[]
+  createMany?: Prisma.DriveObjectCreateManyOwnerInputEnvelope
+  connect?: Prisma.DriveObjectWhereUniqueInput | Prisma.DriveObjectWhereUniqueInput[]
+}
+
+export type DriveObjectUncheckedCreateNestedManyWithoutOwnerInput = {
+  create?: Prisma.XOR<Prisma.DriveObjectCreateWithoutOwnerInput, Prisma.DriveObjectUncheckedCreateWithoutOwnerInput> | Prisma.DriveObjectCreateWithoutOwnerInput[] | Prisma.DriveObjectUncheckedCreateWithoutOwnerInput[]
+  connectOrCreate?: Prisma.DriveObjectCreateOrConnectWithoutOwnerInput | Prisma.DriveObjectCreateOrConnectWithoutOwnerInput[]
+  createMany?: Prisma.DriveObjectCreateManyOwnerInputEnvelope
+  connect?: Prisma.DriveObjectWhereUniqueInput | Prisma.DriveObjectWhereUniqueInput[]
+}
+
+export type DriveObjectUpdateManyWithoutOwnerNestedInput = {
+  create?: Prisma.XOR<Prisma.DriveObjectCreateWithoutOwnerInput, Prisma.DriveObjectUncheckedCreateWithoutOwnerInput> | Prisma.DriveObjectCreateWithoutOwnerInput[] | Prisma.DriveObjectUncheckedCreateWithoutOwnerInput[]
+  connectOrCreate?: Prisma.DriveObjectCreateOrConnectWithoutOwnerInput | Prisma.DriveObjectCreateOrConnectWithoutOwnerInput[]
+  upsert?: Prisma.DriveObjectUpsertWithWhereUniqueWithoutOwnerInput | Prisma.DriveObjectUpsertWithWhereUniqueWithoutOwnerInput[]
+  createMany?: Prisma.DriveObjectCreateManyOwnerInputEnvelope
+  set?: Prisma.DriveObjectWhereUniqueInput | Prisma.DriveObjectWhereUniqueInput[]
+  disconnect?: Prisma.DriveObjectWhereUniqueInput | Prisma.DriveObjectWhereUniqueInput[]
+  delete?: Prisma.DriveObjectWhereUniqueInput | Prisma.DriveObjectWhereUniqueInput[]
+  connect?: Prisma.DriveObjectWhereUniqueInput | Prisma.DriveObjectWhereUniqueInput[]
+  update?: Prisma.DriveObjectUpdateWithWhereUniqueWithoutOwnerInput | Prisma.DriveObjectUpdateWithWhereUniqueWithoutOwnerInput[]
+  updateMany?: Prisma.DriveObjectUpdateManyWithWhereWithoutOwnerInput | Prisma.DriveObjectUpdateManyWithWhereWithoutOwnerInput[]
+  deleteMany?: Prisma.DriveObjectScalarWhereInput | Prisma.DriveObjectScalarWhereInput[]
+}
+
+export type DriveObjectUncheckedUpdateManyWithoutOwnerNestedInput = {
+  create?: Prisma.XOR<Prisma.DriveObjectCreateWithoutOwnerInput, Prisma.DriveObjectUncheckedCreateWithoutOwnerInput> | Prisma.DriveObjectCreateWithoutOwnerInput[] | Prisma.DriveObjectUncheckedCreateWithoutOwnerInput[]
+  connectOrCreate?: Prisma.DriveObjectCreateOrConnectWithoutOwnerInput | Prisma.DriveObjectCreateOrConnectWithoutOwnerInput[]
+  upsert?: Prisma.DriveObjectUpsertWithWhereUniqueWithoutOwnerInput | Prisma.DriveObjectUpsertWithWhereUniqueWithoutOwnerInput[]
+  createMany?: Prisma.DriveObjectCreateManyOwnerInputEnvelope
+  set?: Prisma.DriveObjectWhereUniqueInput | Prisma.DriveObjectWhereUniqueInput[]
+  disconnect?: Prisma.DriveObjectWhereUniqueInput | Prisma.DriveObjectWhereUniqueInput[]
+  delete?: Prisma.DriveObjectWhereUniqueInput | Prisma.DriveObjectWhereUniqueInput[]
+  connect?: Prisma.DriveObjectWhereUniqueInput | Prisma.DriveObjectWhereUniqueInput[]
+  update?: Prisma.DriveObjectUpdateWithWhereUniqueWithoutOwnerInput | Prisma.DriveObjectUpdateWithWhereUniqueWithoutOwnerInput[]
+  updateMany?: Prisma.DriveObjectUpdateManyWithWhereWithoutOwnerInput | Prisma.DriveObjectUpdateManyWithWhereWithoutOwnerInput[]
+  deleteMany?: Prisma.DriveObjectScalarWhereInput | Prisma.DriveObjectScalarWhereInput[]
+}
+
+export type DriveObjectCreateWithoutConnectionInput = {
+  id?: string
+  key: string
+  name: string
+  type: $Enums.DriveObjectType
+  mimeType?: string | null
+  size?: bigint | number
+  etag?: string | null
+  path?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  owner: Prisma.UserCreateNestedOneWithoutDriveObjectsInput
+}
+
+export type DriveObjectUncheckedCreateWithoutConnectionInput = {
+  id?: string
+  ownerId: string
+  key: string
+  name: string
+  type: $Enums.DriveObjectType
+  mimeType?: string | null
+  size?: bigint | number
+  etag?: string | null
+  path?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type DriveObjectCreateOrConnectWithoutConnectionInput = {
+  where: Prisma.DriveObjectWhereUniqueInput
+  create: Prisma.XOR<Prisma.DriveObjectCreateWithoutConnectionInput, Prisma.DriveObjectUncheckedCreateWithoutConnectionInput>
+}
+
+export type DriveObjectCreateManyConnectionInputEnvelope = {
+  data: Prisma.DriveObjectCreateManyConnectionInput | Prisma.DriveObjectCreateManyConnectionInput[]
+  skipDuplicates?: boolean
+}
+
+export type DriveObjectUpsertWithWhereUniqueWithoutConnectionInput = {
+  where: Prisma.DriveObjectWhereUniqueInput
+  update: Prisma.XOR<Prisma.DriveObjectUpdateWithoutConnectionInput, Prisma.DriveObjectUncheckedUpdateWithoutConnectionInput>
+  create: Prisma.XOR<Prisma.DriveObjectCreateWithoutConnectionInput, Prisma.DriveObjectUncheckedCreateWithoutConnectionInput>
+}
+
+export type DriveObjectUpdateWithWhereUniqueWithoutConnectionInput = {
+  where: Prisma.DriveObjectWhereUniqueInput
+  data: Prisma.XOR<Prisma.DriveObjectUpdateWithoutConnectionInput, Prisma.DriveObjectUncheckedUpdateWithoutConnectionInput>
+}
+
+export type DriveObjectUpdateManyWithWhereWithoutConnectionInput = {
+  where: Prisma.DriveObjectScalarWhereInput
+  data: Prisma.XOR<Prisma.DriveObjectUpdateManyMutationInput, Prisma.DriveObjectUncheckedUpdateManyWithoutConnectionInput>
+}
+
+export type DriveObjectScalarWhereInput = {
+  AND?: Prisma.DriveObjectScalarWhereInput | Prisma.DriveObjectScalarWhereInput[]
+  OR?: Prisma.DriveObjectScalarWhereInput[]
+  NOT?: Prisma.DriveObjectScalarWhereInput | Prisma.DriveObjectScalarWhereInput[]
+  id?: Prisma.StringFilter<"DriveObject"> | string
+  ownerId?: Prisma.StringFilter<"DriveObject"> | string
+  connectionId?: Prisma.StringFilter<"DriveObject"> | string
+  key?: Prisma.StringFilter<"DriveObject"> | string
+  name?: Prisma.StringFilter<"DriveObject"> | string
+  type?: Prisma.EnumDriveObjectTypeFilter<"DriveObject"> | $Enums.DriveObjectType
+  mimeType?: Prisma.StringNullableFilter<"DriveObject"> | string | null
+  size?: Prisma.BigIntFilter<"DriveObject"> | bigint | number
+  etag?: Prisma.StringNullableFilter<"DriveObject"> | string | null
+  path?: Prisma.StringFilter<"DriveObject"> | string
+  createdAt?: Prisma.DateTimeFilter<"DriveObject"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"DriveObject"> | Date | string
+}
+
+export type DriveObjectCreateWithoutOwnerInput = {
+  id?: string
+  key: string
+  name: string
+  type: $Enums.DriveObjectType
+  mimeType?: string | null
+  size?: bigint | number
+  etag?: string | null
+  path?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  connection: Prisma.StorageConnectionCreateNestedOneWithoutDriveObjectsInput
+}
+
+export type DriveObjectUncheckedCreateWithoutOwnerInput = {
+  id?: string
+  connectionId: string
+  key: string
+  name: string
+  type: $Enums.DriveObjectType
+  mimeType?: string | null
+  size?: bigint | number
+  etag?: string | null
+  path?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type DriveObjectCreateOrConnectWithoutOwnerInput = {
+  where: Prisma.DriveObjectWhereUniqueInput
+  create: Prisma.XOR<Prisma.DriveObjectCreateWithoutOwnerInput, Prisma.DriveObjectUncheckedCreateWithoutOwnerInput>
+}
+
+export type DriveObjectCreateManyOwnerInputEnvelope = {
+  data: Prisma.DriveObjectCreateManyOwnerInput | Prisma.DriveObjectCreateManyOwnerInput[]
+  skipDuplicates?: boolean
+}
+
+export type DriveObjectUpsertWithWhereUniqueWithoutOwnerInput = {
+  where: Prisma.DriveObjectWhereUniqueInput
+  update: Prisma.XOR<Prisma.DriveObjectUpdateWithoutOwnerInput, Prisma.DriveObjectUncheckedUpdateWithoutOwnerInput>
+  create: Prisma.XOR<Prisma.DriveObjectCreateWithoutOwnerInput, Prisma.DriveObjectUncheckedCreateWithoutOwnerInput>
+}
+
+export type DriveObjectUpdateWithWhereUniqueWithoutOwnerInput = {
+  where: Prisma.DriveObjectWhereUniqueInput
+  data: Prisma.XOR<Prisma.DriveObjectUpdateWithoutOwnerInput, Prisma.DriveObjectUncheckedUpdateWithoutOwnerInput>
+}
+
+export type DriveObjectUpdateManyWithWhereWithoutOwnerInput = {
+  where: Prisma.DriveObjectScalarWhereInput
+  data: Prisma.XOR<Prisma.DriveObjectUpdateManyMutationInput, Prisma.DriveObjectUncheckedUpdateManyWithoutOwnerInput>
+}
+
+export type DriveObjectCreateManyConnectionInput = {
+  id?: string
+  ownerId: string
+  key: string
+  name: string
+  type: $Enums.DriveObjectType
+  mimeType?: string | null
+  size?: bigint | number
+  etag?: string | null
+  path?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type DriveObjectUpdateWithoutConnectionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumDriveObjectTypeFieldUpdateOperationsInput | $Enums.DriveObjectType
+  mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  size?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  etag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  path?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  owner?: Prisma.UserUpdateOneRequiredWithoutDriveObjectsNestedInput
+}
+
+export type DriveObjectUncheckedUpdateWithoutConnectionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumDriveObjectTypeFieldUpdateOperationsInput | $Enums.DriveObjectType
+  mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  size?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  etag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  path?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type DriveObjectUncheckedUpdateManyWithoutConnectionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumDriveObjectTypeFieldUpdateOperationsInput | $Enums.DriveObjectType
+  mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  size?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  etag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  path?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type DriveObjectCreateManyOwnerInput = {
+  id?: string
+  connectionId: string
+  key: string
+  name: string
+  type: $Enums.DriveObjectType
+  mimeType?: string | null
+  size?: bigint | number
+  etag?: string | null
+  path?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type DriveObjectUpdateWithoutOwnerInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumDriveObjectTypeFieldUpdateOperationsInput | $Enums.DriveObjectType
+  mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  size?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  etag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  path?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  connection?: Prisma.StorageConnectionUpdateOneRequiredWithoutDriveObjectsNestedInput
+}
+
+export type DriveObjectUncheckedUpdateWithoutOwnerInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  connectionId?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumDriveObjectTypeFieldUpdateOperationsInput | $Enums.DriveObjectType
+  mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  size?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  etag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  path?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type DriveObjectUncheckedUpdateManyWithoutOwnerInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  connectionId?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumDriveObjectTypeFieldUpdateOperationsInput | $Enums.DriveObjectType
+  mimeType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  size?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  etag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  path?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
@@ -536,6 +872,8 @@ export type DriveObjectSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   path?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  connection?: boolean | Prisma.StorageConnectionDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["driveObject"]>
 
 export type DriveObjectSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -551,6 +889,8 @@ export type DriveObjectSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   path?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  connection?: boolean | Prisma.StorageConnectionDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["driveObject"]>
 
 export type DriveObjectSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -566,6 +906,8 @@ export type DriveObjectSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   path?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  connection?: boolean | Prisma.StorageConnectionDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["driveObject"]>
 
 export type DriveObjectSelectScalar = {
@@ -584,10 +926,25 @@ export type DriveObjectSelectScalar = {
 }
 
 export type DriveObjectOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "ownerId" | "connectionId" | "key" | "name" | "type" | "mimeType" | "size" | "etag" | "path" | "createdAt" | "updatedAt", ExtArgs["result"]["driveObject"]>
+export type DriveObjectInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  connection?: boolean | Prisma.StorageConnectionDefaultArgs<ExtArgs>
+}
+export type DriveObjectIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  connection?: boolean | Prisma.StorageConnectionDefaultArgs<ExtArgs>
+}
+export type DriveObjectIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  connection?: boolean | Prisma.StorageConnectionDefaultArgs<ExtArgs>
+}
 
 export type $DriveObjectPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "DriveObject"
-  objects: {}
+  objects: {
+    owner: Prisma.$UserPayload<ExtArgs>
+    connection: Prisma.$StorageConnectionPayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     ownerId: string
@@ -995,6 +1352,8 @@ readonly fields: DriveObjectFieldRefs;
  */
 export interface Prisma__DriveObjectClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  owner<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  connection<T extends Prisma.StorageConnectionDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.StorageConnectionDefaultArgs<ExtArgs>>): Prisma.Prisma__StorageConnectionClient<runtime.Types.Result.GetResult<Prisma.$StorageConnectionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1053,6 +1412,10 @@ export type DriveObjectFindUniqueArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   omit?: Prisma.DriveObjectOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DriveObjectInclude<ExtArgs> | null
+  /**
    * Filter, which DriveObject to fetch.
    */
   where: Prisma.DriveObjectWhereUniqueInput
@@ -1071,6 +1434,10 @@ export type DriveObjectFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Exten
    */
   omit?: Prisma.DriveObjectOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DriveObjectInclude<ExtArgs> | null
+  /**
    * Filter, which DriveObject to fetch.
    */
   where: Prisma.DriveObjectWhereUniqueInput
@@ -1088,6 +1455,10 @@ export type DriveObjectFindFirstArgs<ExtArgs extends runtime.Types.Extensions.In
    * Omit specific fields from the DriveObject
    */
   omit?: Prisma.DriveObjectOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DriveObjectInclude<ExtArgs> | null
   /**
    * Filter, which DriveObject to fetch.
    */
@@ -1137,6 +1508,10 @@ export type DriveObjectFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Extens
    */
   omit?: Prisma.DriveObjectOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DriveObjectInclude<ExtArgs> | null
+  /**
    * Filter, which DriveObject to fetch.
    */
   where?: Prisma.DriveObjectWhereInput
@@ -1184,6 +1559,10 @@ export type DriveObjectFindManyArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Omit specific fields from the DriveObject
    */
   omit?: Prisma.DriveObjectOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DriveObjectInclude<ExtArgs> | null
   /**
    * Filter, which DriveObjects to fetch.
    */
@@ -1233,6 +1612,10 @@ export type DriveObjectCreateArgs<ExtArgs extends runtime.Types.Extensions.Inter
    */
   omit?: Prisma.DriveObjectOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DriveObjectInclude<ExtArgs> | null
+  /**
    * The data needed to create a DriveObject.
    */
   data: Prisma.XOR<Prisma.DriveObjectCreateInput, Prisma.DriveObjectUncheckedCreateInput>
@@ -1266,6 +1649,10 @@ export type DriveObjectCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Ext
    */
   data: Prisma.DriveObjectCreateManyInput | Prisma.DriveObjectCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DriveObjectIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1280,6 +1667,10 @@ export type DriveObjectUpdateArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Omit specific fields from the DriveObject
    */
   omit?: Prisma.DriveObjectOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DriveObjectInclude<ExtArgs> | null
   /**
    * The data needed to update a DriveObject.
    */
@@ -1332,6 +1723,10 @@ export type DriveObjectUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Ext
    * Limit how many DriveObjects to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DriveObjectIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1346,6 +1741,10 @@ export type DriveObjectUpsertArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Omit specific fields from the DriveObject
    */
   omit?: Prisma.DriveObjectOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DriveObjectInclude<ExtArgs> | null
   /**
    * The filter to search for the DriveObject to update in case it exists.
    */
@@ -1372,6 +1771,10 @@ export type DriveObjectDeleteArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Omit specific fields from the DriveObject
    */
   omit?: Prisma.DriveObjectOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DriveObjectInclude<ExtArgs> | null
   /**
    * Filter which DriveObject to delete.
    */
@@ -1404,4 +1807,8 @@ export type DriveObjectDefaultArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Omit specific fields from the DriveObject
    */
   omit?: Prisma.DriveObjectOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DriveObjectInclude<ExtArgs> | null
 }

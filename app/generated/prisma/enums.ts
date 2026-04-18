@@ -19,7 +19,9 @@ export type StorageConnectionType = (typeof StorageConnectionType)[keyof typeof 
 
 export const StorageProvider = {
   internal: 'internal',
-  s3: 's3'
+  s3: 's3',
+  r2: 'r2',
+  wasabi: 'wasabi'
 } as const
 
 export type StorageProvider = (typeof StorageProvider)[keyof typeof StorageProvider]

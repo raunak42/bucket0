@@ -979,6 +979,7 @@ export const StorageConnectionScalarFieldEnum = {
   rootPrefix: 'rootPrefix',
   accessKeyEnc: 'accessKeyEnc',
   secretKeyEnc: 'secretKeyEnc',
+  credentialsClientEncrypted: 'credentialsClientEncrypted',
   isDefault: 'isDefault',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

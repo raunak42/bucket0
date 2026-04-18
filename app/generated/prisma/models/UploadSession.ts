@@ -284,6 +284,8 @@ export type UploadSessionWhereInput = {
   status?: Prisma.EnumUploadSessionStatusFilter<"UploadSession"> | $Enums.UploadSessionStatus
   createdAt?: Prisma.DateTimeFilter<"UploadSession"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"UploadSession"> | Date | string
+  owner?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  connection?: Prisma.XOR<Prisma.StorageConnectionScalarRelationFilter, Prisma.StorageConnectionWhereInput>
 }
 
 export type UploadSessionOrderByWithRelationInput = {
@@ -300,6 +302,8 @@ export type UploadSessionOrderByWithRelationInput = {
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  owner?: Prisma.UserOrderByWithRelationInput
+  connection?: Prisma.StorageConnectionOrderByWithRelationInput
 }
 
 export type UploadSessionWhereUniqueInput = Prisma.AtLeast<{
@@ -319,6 +323,8 @@ export type UploadSessionWhereUniqueInput = Prisma.AtLeast<{
   status?: Prisma.EnumUploadSessionStatusFilter<"UploadSession"> | $Enums.UploadSessionStatus
   createdAt?: Prisma.DateTimeFilter<"UploadSession"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"UploadSession"> | Date | string
+  owner?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  connection?: Prisma.XOR<Prisma.StorageConnectionScalarRelationFilter, Prisma.StorageConnectionWhereInput>
 }, "id" | "uploadId">
 
 export type UploadSessionOrderByWithAggregationInput = {
@@ -363,8 +369,6 @@ export type UploadSessionScalarWhereWithAggregatesInput = {
 
 export type UploadSessionCreateInput = {
   id?: string
-  ownerId: string
-  connectionId: string
   key: string
   folderPath?: string
   fileName: string
@@ -375,6 +379,8 @@ export type UploadSessionCreateInput = {
   status?: $Enums.UploadSessionStatus
   createdAt?: Date | string
   updatedAt?: Date | string
+  owner: Prisma.UserCreateNestedOneWithoutUploadSessionsInput
+  connection: Prisma.StorageConnectionCreateNestedOneWithoutUploadSessionsInput
 }
 
 export type UploadSessionUncheckedCreateInput = {
@@ -395,8 +401,6 @@ export type UploadSessionUncheckedCreateInput = {
 
 export type UploadSessionUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
-  connectionId?: Prisma.StringFieldUpdateOperationsInput | string
   key?: Prisma.StringFieldUpdateOperationsInput | string
   folderPath?: Prisma.StringFieldUpdateOperationsInput | string
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
@@ -407,6 +411,8 @@ export type UploadSessionUpdateInput = {
   status?: Prisma.EnumUploadSessionStatusFieldUpdateOperationsInput | $Enums.UploadSessionStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  owner?: Prisma.UserUpdateOneRequiredWithoutUploadSessionsNestedInput
+  connection?: Prisma.StorageConnectionUpdateOneRequiredWithoutUploadSessionsNestedInput
 }
 
 export type UploadSessionUncheckedUpdateInput = {
@@ -443,8 +449,6 @@ export type UploadSessionCreateManyInput = {
 
 export type UploadSessionUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
-  connectionId?: Prisma.StringFieldUpdateOperationsInput | string
   key?: Prisma.StringFieldUpdateOperationsInput | string
   folderPath?: Prisma.StringFieldUpdateOperationsInput | string
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
@@ -471,6 +475,16 @@ export type UploadSessionUncheckedUpdateManyInput = {
   status?: Prisma.EnumUploadSessionStatusFieldUpdateOperationsInput | $Enums.UploadSessionStatus
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type UploadSessionListRelationFilter = {
+  every?: Prisma.UploadSessionWhereInput
+  some?: Prisma.UploadSessionWhereInput
+  none?: Prisma.UploadSessionWhereInput
+}
+
+export type UploadSessionOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type UploadSessionCountOrderByAggregateInput = {
@@ -531,6 +545,48 @@ export type UploadSessionSumOrderByAggregateInput = {
   partSize?: Prisma.SortOrder
 }
 
+export type UploadSessionCreateNestedManyWithoutConnectionInput = {
+  create?: Prisma.XOR<Prisma.UploadSessionCreateWithoutConnectionInput, Prisma.UploadSessionUncheckedCreateWithoutConnectionInput> | Prisma.UploadSessionCreateWithoutConnectionInput[] | Prisma.UploadSessionUncheckedCreateWithoutConnectionInput[]
+  connectOrCreate?: Prisma.UploadSessionCreateOrConnectWithoutConnectionInput | Prisma.UploadSessionCreateOrConnectWithoutConnectionInput[]
+  createMany?: Prisma.UploadSessionCreateManyConnectionInputEnvelope
+  connect?: Prisma.UploadSessionWhereUniqueInput | Prisma.UploadSessionWhereUniqueInput[]
+}
+
+export type UploadSessionUncheckedCreateNestedManyWithoutConnectionInput = {
+  create?: Prisma.XOR<Prisma.UploadSessionCreateWithoutConnectionInput, Prisma.UploadSessionUncheckedCreateWithoutConnectionInput> | Prisma.UploadSessionCreateWithoutConnectionInput[] | Prisma.UploadSessionUncheckedCreateWithoutConnectionInput[]
+  connectOrCreate?: Prisma.UploadSessionCreateOrConnectWithoutConnectionInput | Prisma.UploadSessionCreateOrConnectWithoutConnectionInput[]
+  createMany?: Prisma.UploadSessionCreateManyConnectionInputEnvelope
+  connect?: Prisma.UploadSessionWhereUniqueInput | Prisma.UploadSessionWhereUniqueInput[]
+}
+
+export type UploadSessionUpdateManyWithoutConnectionNestedInput = {
+  create?: Prisma.XOR<Prisma.UploadSessionCreateWithoutConnectionInput, Prisma.UploadSessionUncheckedCreateWithoutConnectionInput> | Prisma.UploadSessionCreateWithoutConnectionInput[] | Prisma.UploadSessionUncheckedCreateWithoutConnectionInput[]
+  connectOrCreate?: Prisma.UploadSessionCreateOrConnectWithoutConnectionInput | Prisma.UploadSessionCreateOrConnectWithoutConnectionInput[]
+  upsert?: Prisma.UploadSessionUpsertWithWhereUniqueWithoutConnectionInput | Prisma.UploadSessionUpsertWithWhereUniqueWithoutConnectionInput[]
+  createMany?: Prisma.UploadSessionCreateManyConnectionInputEnvelope
+  set?: Prisma.UploadSessionWhereUniqueInput | Prisma.UploadSessionWhereUniqueInput[]
+  disconnect?: Prisma.UploadSessionWhereUniqueInput | Prisma.UploadSessionWhereUniqueInput[]
+  delete?: Prisma.UploadSessionWhereUniqueInput | Prisma.UploadSessionWhereUniqueInput[]
+  connect?: Prisma.UploadSessionWhereUniqueInput | Prisma.UploadSessionWhereUniqueInput[]
+  update?: Prisma.UploadSessionUpdateWithWhereUniqueWithoutConnectionInput | Prisma.UploadSessionUpdateWithWhereUniqueWithoutConnectionInput[]
+  updateMany?: Prisma.UploadSessionUpdateManyWithWhereWithoutConnectionInput | Prisma.UploadSessionUpdateManyWithWhereWithoutConnectionInput[]
+  deleteMany?: Prisma.UploadSessionScalarWhereInput | Prisma.UploadSessionScalarWhereInput[]
+}
+
+export type UploadSessionUncheckedUpdateManyWithoutConnectionNestedInput = {
+  create?: Prisma.XOR<Prisma.UploadSessionCreateWithoutConnectionInput, Prisma.UploadSessionUncheckedCreateWithoutConnectionInput> | Prisma.UploadSessionCreateWithoutConnectionInput[] | Prisma.UploadSessionUncheckedCreateWithoutConnectionInput[]
+  connectOrCreate?: Prisma.UploadSessionCreateOrConnectWithoutConnectionInput | Prisma.UploadSessionCreateOrConnectWithoutConnectionInput[]
+  upsert?: Prisma.UploadSessionUpsertWithWhereUniqueWithoutConnectionInput | Prisma.UploadSessionUpsertWithWhereUniqueWithoutConnectionInput[]
+  createMany?: Prisma.UploadSessionCreateManyConnectionInputEnvelope
+  set?: Prisma.UploadSessionWhereUniqueInput | Prisma.UploadSessionWhereUniqueInput[]
+  disconnect?: Prisma.UploadSessionWhereUniqueInput | Prisma.UploadSessionWhereUniqueInput[]
+  delete?: Prisma.UploadSessionWhereUniqueInput | Prisma.UploadSessionWhereUniqueInput[]
+  connect?: Prisma.UploadSessionWhereUniqueInput | Prisma.UploadSessionWhereUniqueInput[]
+  update?: Prisma.UploadSessionUpdateWithWhereUniqueWithoutConnectionInput | Prisma.UploadSessionUpdateWithWhereUniqueWithoutConnectionInput[]
+  updateMany?: Prisma.UploadSessionUpdateManyWithWhereWithoutConnectionInput | Prisma.UploadSessionUpdateManyWithWhereWithoutConnectionInput[]
+  deleteMany?: Prisma.UploadSessionScalarWhereInput | Prisma.UploadSessionScalarWhereInput[]
+}
+
 export type IntFieldUpdateOperationsInput = {
   set?: number
   increment?: number
@@ -541,6 +597,299 @@ export type IntFieldUpdateOperationsInput = {
 
 export type EnumUploadSessionStatusFieldUpdateOperationsInput = {
   set?: $Enums.UploadSessionStatus
+}
+
+export type UploadSessionCreateNestedManyWithoutOwnerInput = {
+  create?: Prisma.XOR<Prisma.UploadSessionCreateWithoutOwnerInput, Prisma.UploadSessionUncheckedCreateWithoutOwnerInput> | Prisma.UploadSessionCreateWithoutOwnerInput[] | Prisma.UploadSessionUncheckedCreateWithoutOwnerInput[]
+  connectOrCreate?: Prisma.UploadSessionCreateOrConnectWithoutOwnerInput | Prisma.UploadSessionCreateOrConnectWithoutOwnerInput[]
+  createMany?: Prisma.UploadSessionCreateManyOwnerInputEnvelope
+  connect?: Prisma.UploadSessionWhereUniqueInput | Prisma.UploadSessionWhereUniqueInput[]
+}
+
+export type UploadSessionUncheckedCreateNestedManyWithoutOwnerInput = {
+  create?: Prisma.XOR<Prisma.UploadSessionCreateWithoutOwnerInput, Prisma.UploadSessionUncheckedCreateWithoutOwnerInput> | Prisma.UploadSessionCreateWithoutOwnerInput[] | Prisma.UploadSessionUncheckedCreateWithoutOwnerInput[]
+  connectOrCreate?: Prisma.UploadSessionCreateOrConnectWithoutOwnerInput | Prisma.UploadSessionCreateOrConnectWithoutOwnerInput[]
+  createMany?: Prisma.UploadSessionCreateManyOwnerInputEnvelope
+  connect?: Prisma.UploadSessionWhereUniqueInput | Prisma.UploadSessionWhereUniqueInput[]
+}
+
+export type UploadSessionUpdateManyWithoutOwnerNestedInput = {
+  create?: Prisma.XOR<Prisma.UploadSessionCreateWithoutOwnerInput, Prisma.UploadSessionUncheckedCreateWithoutOwnerInput> | Prisma.UploadSessionCreateWithoutOwnerInput[] | Prisma.UploadSessionUncheckedCreateWithoutOwnerInput[]
+  connectOrCreate?: Prisma.UploadSessionCreateOrConnectWithoutOwnerInput | Prisma.UploadSessionCreateOrConnectWithoutOwnerInput[]
+  upsert?: Prisma.UploadSessionUpsertWithWhereUniqueWithoutOwnerInput | Prisma.UploadSessionUpsertWithWhereUniqueWithoutOwnerInput[]
+  createMany?: Prisma.UploadSessionCreateManyOwnerInputEnvelope
+  set?: Prisma.UploadSessionWhereUniqueInput | Prisma.UploadSessionWhereUniqueInput[]
+  disconnect?: Prisma.UploadSessionWhereUniqueInput | Prisma.UploadSessionWhereUniqueInput[]
+  delete?: Prisma.UploadSessionWhereUniqueInput | Prisma.UploadSessionWhereUniqueInput[]
+  connect?: Prisma.UploadSessionWhereUniqueInput | Prisma.UploadSessionWhereUniqueInput[]
+  update?: Prisma.UploadSessionUpdateWithWhereUniqueWithoutOwnerInput | Prisma.UploadSessionUpdateWithWhereUniqueWithoutOwnerInput[]
+  updateMany?: Prisma.UploadSessionUpdateManyWithWhereWithoutOwnerInput | Prisma.UploadSessionUpdateManyWithWhereWithoutOwnerInput[]
+  deleteMany?: Prisma.UploadSessionScalarWhereInput | Prisma.UploadSessionScalarWhereInput[]
+}
+
+export type UploadSessionUncheckedUpdateManyWithoutOwnerNestedInput = {
+  create?: Prisma.XOR<Prisma.UploadSessionCreateWithoutOwnerInput, Prisma.UploadSessionUncheckedCreateWithoutOwnerInput> | Prisma.UploadSessionCreateWithoutOwnerInput[] | Prisma.UploadSessionUncheckedCreateWithoutOwnerInput[]
+  connectOrCreate?: Prisma.UploadSessionCreateOrConnectWithoutOwnerInput | Prisma.UploadSessionCreateOrConnectWithoutOwnerInput[]
+  upsert?: Prisma.UploadSessionUpsertWithWhereUniqueWithoutOwnerInput | Prisma.UploadSessionUpsertWithWhereUniqueWithoutOwnerInput[]
+  createMany?: Prisma.UploadSessionCreateManyOwnerInputEnvelope
+  set?: Prisma.UploadSessionWhereUniqueInput | Prisma.UploadSessionWhereUniqueInput[]
+  disconnect?: Prisma.UploadSessionWhereUniqueInput | Prisma.UploadSessionWhereUniqueInput[]
+  delete?: Prisma.UploadSessionWhereUniqueInput | Prisma.UploadSessionWhereUniqueInput[]
+  connect?: Prisma.UploadSessionWhereUniqueInput | Prisma.UploadSessionWhereUniqueInput[]
+  update?: Prisma.UploadSessionUpdateWithWhereUniqueWithoutOwnerInput | Prisma.UploadSessionUpdateWithWhereUniqueWithoutOwnerInput[]
+  updateMany?: Prisma.UploadSessionUpdateManyWithWhereWithoutOwnerInput | Prisma.UploadSessionUpdateManyWithWhereWithoutOwnerInput[]
+  deleteMany?: Prisma.UploadSessionScalarWhereInput | Prisma.UploadSessionScalarWhereInput[]
+}
+
+export type UploadSessionCreateWithoutConnectionInput = {
+  id?: string
+  key: string
+  folderPath?: string
+  fileName: string
+  mimeType: string
+  size: bigint | number
+  uploadId: string
+  partSize: number
+  status?: $Enums.UploadSessionStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  owner: Prisma.UserCreateNestedOneWithoutUploadSessionsInput
+}
+
+export type UploadSessionUncheckedCreateWithoutConnectionInput = {
+  id?: string
+  ownerId: string
+  key: string
+  folderPath?: string
+  fileName: string
+  mimeType: string
+  size: bigint | number
+  uploadId: string
+  partSize: number
+  status?: $Enums.UploadSessionStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type UploadSessionCreateOrConnectWithoutConnectionInput = {
+  where: Prisma.UploadSessionWhereUniqueInput
+  create: Prisma.XOR<Prisma.UploadSessionCreateWithoutConnectionInput, Prisma.UploadSessionUncheckedCreateWithoutConnectionInput>
+}
+
+export type UploadSessionCreateManyConnectionInputEnvelope = {
+  data: Prisma.UploadSessionCreateManyConnectionInput | Prisma.UploadSessionCreateManyConnectionInput[]
+  skipDuplicates?: boolean
+}
+
+export type UploadSessionUpsertWithWhereUniqueWithoutConnectionInput = {
+  where: Prisma.UploadSessionWhereUniqueInput
+  update: Prisma.XOR<Prisma.UploadSessionUpdateWithoutConnectionInput, Prisma.UploadSessionUncheckedUpdateWithoutConnectionInput>
+  create: Prisma.XOR<Prisma.UploadSessionCreateWithoutConnectionInput, Prisma.UploadSessionUncheckedCreateWithoutConnectionInput>
+}
+
+export type UploadSessionUpdateWithWhereUniqueWithoutConnectionInput = {
+  where: Prisma.UploadSessionWhereUniqueInput
+  data: Prisma.XOR<Prisma.UploadSessionUpdateWithoutConnectionInput, Prisma.UploadSessionUncheckedUpdateWithoutConnectionInput>
+}
+
+export type UploadSessionUpdateManyWithWhereWithoutConnectionInput = {
+  where: Prisma.UploadSessionScalarWhereInput
+  data: Prisma.XOR<Prisma.UploadSessionUpdateManyMutationInput, Prisma.UploadSessionUncheckedUpdateManyWithoutConnectionInput>
+}
+
+export type UploadSessionScalarWhereInput = {
+  AND?: Prisma.UploadSessionScalarWhereInput | Prisma.UploadSessionScalarWhereInput[]
+  OR?: Prisma.UploadSessionScalarWhereInput[]
+  NOT?: Prisma.UploadSessionScalarWhereInput | Prisma.UploadSessionScalarWhereInput[]
+  id?: Prisma.StringFilter<"UploadSession"> | string
+  ownerId?: Prisma.StringFilter<"UploadSession"> | string
+  connectionId?: Prisma.StringFilter<"UploadSession"> | string
+  key?: Prisma.StringFilter<"UploadSession"> | string
+  folderPath?: Prisma.StringFilter<"UploadSession"> | string
+  fileName?: Prisma.StringFilter<"UploadSession"> | string
+  mimeType?: Prisma.StringFilter<"UploadSession"> | string
+  size?: Prisma.BigIntFilter<"UploadSession"> | bigint | number
+  uploadId?: Prisma.StringFilter<"UploadSession"> | string
+  partSize?: Prisma.IntFilter<"UploadSession"> | number
+  status?: Prisma.EnumUploadSessionStatusFilter<"UploadSession"> | $Enums.UploadSessionStatus
+  createdAt?: Prisma.DateTimeFilter<"UploadSession"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"UploadSession"> | Date | string
+}
+
+export type UploadSessionCreateWithoutOwnerInput = {
+  id?: string
+  key: string
+  folderPath?: string
+  fileName: string
+  mimeType: string
+  size: bigint | number
+  uploadId: string
+  partSize: number
+  status?: $Enums.UploadSessionStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  connection: Prisma.StorageConnectionCreateNestedOneWithoutUploadSessionsInput
+}
+
+export type UploadSessionUncheckedCreateWithoutOwnerInput = {
+  id?: string
+  connectionId: string
+  key: string
+  folderPath?: string
+  fileName: string
+  mimeType: string
+  size: bigint | number
+  uploadId: string
+  partSize: number
+  status?: $Enums.UploadSessionStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type UploadSessionCreateOrConnectWithoutOwnerInput = {
+  where: Prisma.UploadSessionWhereUniqueInput
+  create: Prisma.XOR<Prisma.UploadSessionCreateWithoutOwnerInput, Prisma.UploadSessionUncheckedCreateWithoutOwnerInput>
+}
+
+export type UploadSessionCreateManyOwnerInputEnvelope = {
+  data: Prisma.UploadSessionCreateManyOwnerInput | Prisma.UploadSessionCreateManyOwnerInput[]
+  skipDuplicates?: boolean
+}
+
+export type UploadSessionUpsertWithWhereUniqueWithoutOwnerInput = {
+  where: Prisma.UploadSessionWhereUniqueInput
+  update: Prisma.XOR<Prisma.UploadSessionUpdateWithoutOwnerInput, Prisma.UploadSessionUncheckedUpdateWithoutOwnerInput>
+  create: Prisma.XOR<Prisma.UploadSessionCreateWithoutOwnerInput, Prisma.UploadSessionUncheckedCreateWithoutOwnerInput>
+}
+
+export type UploadSessionUpdateWithWhereUniqueWithoutOwnerInput = {
+  where: Prisma.UploadSessionWhereUniqueInput
+  data: Prisma.XOR<Prisma.UploadSessionUpdateWithoutOwnerInput, Prisma.UploadSessionUncheckedUpdateWithoutOwnerInput>
+}
+
+export type UploadSessionUpdateManyWithWhereWithoutOwnerInput = {
+  where: Prisma.UploadSessionScalarWhereInput
+  data: Prisma.XOR<Prisma.UploadSessionUpdateManyMutationInput, Prisma.UploadSessionUncheckedUpdateManyWithoutOwnerInput>
+}
+
+export type UploadSessionCreateManyConnectionInput = {
+  id?: string
+  ownerId: string
+  key: string
+  folderPath?: string
+  fileName: string
+  mimeType: string
+  size: bigint | number
+  uploadId: string
+  partSize: number
+  status?: $Enums.UploadSessionStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type UploadSessionUpdateWithoutConnectionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  folderPath?: Prisma.StringFieldUpdateOperationsInput | string
+  fileName?: Prisma.StringFieldUpdateOperationsInput | string
+  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  size?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  uploadId?: Prisma.StringFieldUpdateOperationsInput | string
+  partSize?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.EnumUploadSessionStatusFieldUpdateOperationsInput | $Enums.UploadSessionStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  owner?: Prisma.UserUpdateOneRequiredWithoutUploadSessionsNestedInput
+}
+
+export type UploadSessionUncheckedUpdateWithoutConnectionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  folderPath?: Prisma.StringFieldUpdateOperationsInput | string
+  fileName?: Prisma.StringFieldUpdateOperationsInput | string
+  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  size?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  uploadId?: Prisma.StringFieldUpdateOperationsInput | string
+  partSize?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.EnumUploadSessionStatusFieldUpdateOperationsInput | $Enums.UploadSessionStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type UploadSessionUncheckedUpdateManyWithoutConnectionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  folderPath?: Prisma.StringFieldUpdateOperationsInput | string
+  fileName?: Prisma.StringFieldUpdateOperationsInput | string
+  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  size?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  uploadId?: Prisma.StringFieldUpdateOperationsInput | string
+  partSize?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.EnumUploadSessionStatusFieldUpdateOperationsInput | $Enums.UploadSessionStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type UploadSessionCreateManyOwnerInput = {
+  id?: string
+  connectionId: string
+  key: string
+  folderPath?: string
+  fileName: string
+  mimeType: string
+  size: bigint | number
+  uploadId: string
+  partSize: number
+  status?: $Enums.UploadSessionStatus
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type UploadSessionUpdateWithoutOwnerInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  folderPath?: Prisma.StringFieldUpdateOperationsInput | string
+  fileName?: Prisma.StringFieldUpdateOperationsInput | string
+  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  size?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  uploadId?: Prisma.StringFieldUpdateOperationsInput | string
+  partSize?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.EnumUploadSessionStatusFieldUpdateOperationsInput | $Enums.UploadSessionStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  connection?: Prisma.StorageConnectionUpdateOneRequiredWithoutUploadSessionsNestedInput
+}
+
+export type UploadSessionUncheckedUpdateWithoutOwnerInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  connectionId?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  folderPath?: Prisma.StringFieldUpdateOperationsInput | string
+  fileName?: Prisma.StringFieldUpdateOperationsInput | string
+  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  size?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  uploadId?: Prisma.StringFieldUpdateOperationsInput | string
+  partSize?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.EnumUploadSessionStatusFieldUpdateOperationsInput | $Enums.UploadSessionStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type UploadSessionUncheckedUpdateManyWithoutOwnerInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  connectionId?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  folderPath?: Prisma.StringFieldUpdateOperationsInput | string
+  fileName?: Prisma.StringFieldUpdateOperationsInput | string
+  mimeType?: Prisma.StringFieldUpdateOperationsInput | string
+  size?: Prisma.BigIntFieldUpdateOperationsInput | bigint | number
+  uploadId?: Prisma.StringFieldUpdateOperationsInput | string
+  partSize?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.EnumUploadSessionStatusFieldUpdateOperationsInput | $Enums.UploadSessionStatus
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
@@ -559,6 +908,8 @@ export type UploadSessionSelect<ExtArgs extends runtime.Types.Extensions.Interna
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  connection?: boolean | Prisma.StorageConnectionDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["uploadSession"]>
 
 export type UploadSessionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -575,6 +926,8 @@ export type UploadSessionSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  connection?: boolean | Prisma.StorageConnectionDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["uploadSession"]>
 
 export type UploadSessionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -591,6 +944,8 @@ export type UploadSessionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   status?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  connection?: boolean | Prisma.StorageConnectionDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["uploadSession"]>
 
 export type UploadSessionSelectScalar = {
@@ -610,10 +965,25 @@ export type UploadSessionSelectScalar = {
 }
 
 export type UploadSessionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "ownerId" | "connectionId" | "key" | "folderPath" | "fileName" | "mimeType" | "size" | "uploadId" | "partSize" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["uploadSession"]>
+export type UploadSessionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  connection?: boolean | Prisma.StorageConnectionDefaultArgs<ExtArgs>
+}
+export type UploadSessionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  connection?: boolean | Prisma.StorageConnectionDefaultArgs<ExtArgs>
+}
+export type UploadSessionIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  connection?: boolean | Prisma.StorageConnectionDefaultArgs<ExtArgs>
+}
 
 export type $UploadSessionPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "UploadSession"
-  objects: {}
+  objects: {
+    owner: Prisma.$UserPayload<ExtArgs>
+    connection: Prisma.$StorageConnectionPayload<ExtArgs>
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     ownerId: string
@@ -1022,6 +1392,8 @@ readonly fields: UploadSessionFieldRefs;
  */
 export interface Prisma__UploadSessionClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  owner<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  connection<T extends Prisma.StorageConnectionDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.StorageConnectionDefaultArgs<ExtArgs>>): Prisma.Prisma__StorageConnectionClient<runtime.Types.Result.GetResult<Prisma.$StorageConnectionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1081,6 +1453,10 @@ export type UploadSessionFindUniqueArgs<ExtArgs extends runtime.Types.Extensions
    */
   omit?: Prisma.UploadSessionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UploadSessionInclude<ExtArgs> | null
+  /**
    * Filter, which UploadSession to fetch.
    */
   where: Prisma.UploadSessionWhereUniqueInput
@@ -1099,6 +1475,10 @@ export type UploadSessionFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Ext
    */
   omit?: Prisma.UploadSessionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UploadSessionInclude<ExtArgs> | null
+  /**
    * Filter, which UploadSession to fetch.
    */
   where: Prisma.UploadSessionWhereUniqueInput
@@ -1116,6 +1496,10 @@ export type UploadSessionFindFirstArgs<ExtArgs extends runtime.Types.Extensions.
    * Omit specific fields from the UploadSession
    */
   omit?: Prisma.UploadSessionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UploadSessionInclude<ExtArgs> | null
   /**
    * Filter, which UploadSession to fetch.
    */
@@ -1165,6 +1549,10 @@ export type UploadSessionFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Exte
    */
   omit?: Prisma.UploadSessionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UploadSessionInclude<ExtArgs> | null
+  /**
    * Filter, which UploadSession to fetch.
    */
   where?: Prisma.UploadSessionWhereInput
@@ -1212,6 +1600,10 @@ export type UploadSessionFindManyArgs<ExtArgs extends runtime.Types.Extensions.I
    * Omit specific fields from the UploadSession
    */
   omit?: Prisma.UploadSessionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UploadSessionInclude<ExtArgs> | null
   /**
    * Filter, which UploadSessions to fetch.
    */
@@ -1261,6 +1653,10 @@ export type UploadSessionCreateArgs<ExtArgs extends runtime.Types.Extensions.Int
    */
   omit?: Prisma.UploadSessionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UploadSessionInclude<ExtArgs> | null
+  /**
    * The data needed to create a UploadSession.
    */
   data: Prisma.XOR<Prisma.UploadSessionCreateInput, Prisma.UploadSessionUncheckedCreateInput>
@@ -1294,6 +1690,10 @@ export type UploadSessionCreateManyAndReturnArgs<ExtArgs extends runtime.Types.E
    */
   data: Prisma.UploadSessionCreateManyInput | Prisma.UploadSessionCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UploadSessionIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1308,6 +1708,10 @@ export type UploadSessionUpdateArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Omit specific fields from the UploadSession
    */
   omit?: Prisma.UploadSessionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UploadSessionInclude<ExtArgs> | null
   /**
    * The data needed to update a UploadSession.
    */
@@ -1360,6 +1764,10 @@ export type UploadSessionUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.E
    * Limit how many UploadSessions to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UploadSessionIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1374,6 +1782,10 @@ export type UploadSessionUpsertArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Omit specific fields from the UploadSession
    */
   omit?: Prisma.UploadSessionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UploadSessionInclude<ExtArgs> | null
   /**
    * The filter to search for the UploadSession to update in case it exists.
    */
@@ -1400,6 +1812,10 @@ export type UploadSessionDeleteArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Omit specific fields from the UploadSession
    */
   omit?: Prisma.UploadSessionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UploadSessionInclude<ExtArgs> | null
   /**
    * Filter which UploadSession to delete.
    */
@@ -1432,4 +1848,8 @@ export type UploadSessionDefaultArgs<ExtArgs extends runtime.Types.Extensions.In
    * Omit specific fields from the UploadSession
    */
   omit?: Prisma.UploadSessionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UploadSessionInclude<ExtArgs> | null
 }

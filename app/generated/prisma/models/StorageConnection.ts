@@ -36,6 +36,7 @@ export type StorageConnectionMinAggregateOutputType = {
   rootPrefix: string | null
   accessKeyEnc: string | null
   secretKeyEnc: string | null
+  credentialsClientEncrypted: boolean | null
   isDefault: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -53,6 +54,7 @@ export type StorageConnectionMaxAggregateOutputType = {
   rootPrefix: string | null
   accessKeyEnc: string | null
   secretKeyEnc: string | null
+  credentialsClientEncrypted: boolean | null
   isDefault: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -70,6 +72,7 @@ export type StorageConnectionCountAggregateOutputType = {
   rootPrefix: number
   accessKeyEnc: number
   secretKeyEnc: number
+  credentialsClientEncrypted: number
   isDefault: number
   createdAt: number
   updatedAt: number
@@ -89,6 +92,7 @@ export type StorageConnectionMinAggregateInputType = {
   rootPrefix?: true
   accessKeyEnc?: true
   secretKeyEnc?: true
+  credentialsClientEncrypted?: true
   isDefault?: true
   createdAt?: true
   updatedAt?: true
@@ -106,6 +110,7 @@ export type StorageConnectionMaxAggregateInputType = {
   rootPrefix?: true
   accessKeyEnc?: true
   secretKeyEnc?: true
+  credentialsClientEncrypted?: true
   isDefault?: true
   createdAt?: true
   updatedAt?: true
@@ -123,6 +128,7 @@ export type StorageConnectionCountAggregateInputType = {
   rootPrefix?: true
   accessKeyEnc?: true
   secretKeyEnc?: true
+  credentialsClientEncrypted?: true
   isDefault?: true
   createdAt?: true
   updatedAt?: true
@@ -213,6 +219,7 @@ export type StorageConnectionGroupByOutputType = {
   rootPrefix: string
   accessKeyEnc: string | null
   secretKeyEnc: string | null
+  credentialsClientEncrypted: boolean
   isDefault: boolean
   createdAt: Date
   updatedAt: Date
@@ -251,9 +258,13 @@ export type StorageConnectionWhereInput = {
   rootPrefix?: Prisma.StringFilter<"StorageConnection"> | string
   accessKeyEnc?: Prisma.StringNullableFilter<"StorageConnection"> | string | null
   secretKeyEnc?: Prisma.StringNullableFilter<"StorageConnection"> | string | null
+  credentialsClientEncrypted?: Prisma.BoolFilter<"StorageConnection"> | boolean
   isDefault?: Prisma.BoolFilter<"StorageConnection"> | boolean
   createdAt?: Prisma.DateTimeFilter<"StorageConnection"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"StorageConnection"> | Date | string
+  owner?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  driveObjects?: Prisma.DriveObjectListRelationFilter
+  uploadSessions?: Prisma.UploadSessionListRelationFilter
 }
 
 export type StorageConnectionOrderByWithRelationInput = {
@@ -268,9 +279,13 @@ export type StorageConnectionOrderByWithRelationInput = {
   rootPrefix?: Prisma.SortOrder
   accessKeyEnc?: Prisma.SortOrderInput | Prisma.SortOrder
   secretKeyEnc?: Prisma.SortOrderInput | Prisma.SortOrder
+  credentialsClientEncrypted?: Prisma.SortOrder
   isDefault?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  owner?: Prisma.UserOrderByWithRelationInput
+  driveObjects?: Prisma.DriveObjectOrderByRelationAggregateInput
+  uploadSessions?: Prisma.UploadSessionOrderByRelationAggregateInput
 }
 
 export type StorageConnectionWhereUniqueInput = Prisma.AtLeast<{
@@ -288,9 +303,13 @@ export type StorageConnectionWhereUniqueInput = Prisma.AtLeast<{
   rootPrefix?: Prisma.StringFilter<"StorageConnection"> | string
   accessKeyEnc?: Prisma.StringNullableFilter<"StorageConnection"> | string | null
   secretKeyEnc?: Prisma.StringNullableFilter<"StorageConnection"> | string | null
+  credentialsClientEncrypted?: Prisma.BoolFilter<"StorageConnection"> | boolean
   isDefault?: Prisma.BoolFilter<"StorageConnection"> | boolean
   createdAt?: Prisma.DateTimeFilter<"StorageConnection"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"StorageConnection"> | Date | string
+  owner?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  driveObjects?: Prisma.DriveObjectListRelationFilter
+  uploadSessions?: Prisma.UploadSessionListRelationFilter
 }, "id">
 
 export type StorageConnectionOrderByWithAggregationInput = {
@@ -305,6 +324,7 @@ export type StorageConnectionOrderByWithAggregationInput = {
   rootPrefix?: Prisma.SortOrder
   accessKeyEnc?: Prisma.SortOrderInput | Prisma.SortOrder
   secretKeyEnc?: Prisma.SortOrderInput | Prisma.SortOrder
+  credentialsClientEncrypted?: Prisma.SortOrder
   isDefault?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -328,6 +348,7 @@ export type StorageConnectionScalarWhereWithAggregatesInput = {
   rootPrefix?: Prisma.StringWithAggregatesFilter<"StorageConnection"> | string
   accessKeyEnc?: Prisma.StringNullableWithAggregatesFilter<"StorageConnection"> | string | null
   secretKeyEnc?: Prisma.StringNullableWithAggregatesFilter<"StorageConnection"> | string | null
+  credentialsClientEncrypted?: Prisma.BoolWithAggregatesFilter<"StorageConnection"> | boolean
   isDefault?: Prisma.BoolWithAggregatesFilter<"StorageConnection"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"StorageConnection"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"StorageConnection"> | Date | string
@@ -335,7 +356,6 @@ export type StorageConnectionScalarWhereWithAggregatesInput = {
 
 export type StorageConnectionCreateInput = {
   id?: string
-  ownerId: string
   name: string
   type: $Enums.StorageConnectionType
   provider: $Enums.StorageProvider
@@ -345,9 +365,13 @@ export type StorageConnectionCreateInput = {
   rootPrefix?: string
   accessKeyEnc?: string | null
   secretKeyEnc?: string | null
+  credentialsClientEncrypted?: boolean
   isDefault?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  owner: Prisma.UserCreateNestedOneWithoutStorageConnectionsInput
+  driveObjects?: Prisma.DriveObjectCreateNestedManyWithoutConnectionInput
+  uploadSessions?: Prisma.UploadSessionCreateNestedManyWithoutConnectionInput
 }
 
 export type StorageConnectionUncheckedCreateInput = {
@@ -362,14 +386,16 @@ export type StorageConnectionUncheckedCreateInput = {
   rootPrefix?: string
   accessKeyEnc?: string | null
   secretKeyEnc?: string | null
+  credentialsClientEncrypted?: boolean
   isDefault?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  driveObjects?: Prisma.DriveObjectUncheckedCreateNestedManyWithoutConnectionInput
+  uploadSessions?: Prisma.UploadSessionUncheckedCreateNestedManyWithoutConnectionInput
 }
 
 export type StorageConnectionUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumStorageConnectionTypeFieldUpdateOperationsInput | $Enums.StorageConnectionType
   provider?: Prisma.EnumStorageProviderFieldUpdateOperationsInput | $Enums.StorageProvider
@@ -379,9 +405,13 @@ export type StorageConnectionUpdateInput = {
   rootPrefix?: Prisma.StringFieldUpdateOperationsInput | string
   accessKeyEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   secretKeyEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  credentialsClientEncrypted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDefault?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  owner?: Prisma.UserUpdateOneRequiredWithoutStorageConnectionsNestedInput
+  driveObjects?: Prisma.DriveObjectUpdateManyWithoutConnectionNestedInput
+  uploadSessions?: Prisma.UploadSessionUpdateManyWithoutConnectionNestedInput
 }
 
 export type StorageConnectionUncheckedUpdateInput = {
@@ -396,9 +426,12 @@ export type StorageConnectionUncheckedUpdateInput = {
   rootPrefix?: Prisma.StringFieldUpdateOperationsInput | string
   accessKeyEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   secretKeyEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  credentialsClientEncrypted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDefault?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  driveObjects?: Prisma.DriveObjectUncheckedUpdateManyWithoutConnectionNestedInput
+  uploadSessions?: Prisma.UploadSessionUncheckedUpdateManyWithoutConnectionNestedInput
 }
 
 export type StorageConnectionCreateManyInput = {
@@ -413,6 +446,7 @@ export type StorageConnectionCreateManyInput = {
   rootPrefix?: string
   accessKeyEnc?: string | null
   secretKeyEnc?: string | null
+  credentialsClientEncrypted?: boolean
   isDefault?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -420,7 +454,6 @@ export type StorageConnectionCreateManyInput = {
 
 export type StorageConnectionUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumStorageConnectionTypeFieldUpdateOperationsInput | $Enums.StorageConnectionType
   provider?: Prisma.EnumStorageProviderFieldUpdateOperationsInput | $Enums.StorageProvider
@@ -430,6 +463,7 @@ export type StorageConnectionUpdateManyMutationInput = {
   rootPrefix?: Prisma.StringFieldUpdateOperationsInput | string
   accessKeyEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   secretKeyEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  credentialsClientEncrypted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDefault?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -447,6 +481,7 @@ export type StorageConnectionUncheckedUpdateManyInput = {
   rootPrefix?: Prisma.StringFieldUpdateOperationsInput | string
   accessKeyEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   secretKeyEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  credentialsClientEncrypted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDefault?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -464,6 +499,7 @@ export type StorageConnectionCountOrderByAggregateInput = {
   rootPrefix?: Prisma.SortOrder
   accessKeyEnc?: Prisma.SortOrder
   secretKeyEnc?: Prisma.SortOrder
+  credentialsClientEncrypted?: Prisma.SortOrder
   isDefault?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -481,6 +517,7 @@ export type StorageConnectionMaxOrderByAggregateInput = {
   rootPrefix?: Prisma.SortOrder
   accessKeyEnc?: Prisma.SortOrder
   secretKeyEnc?: Prisma.SortOrder
+  credentialsClientEncrypted?: Prisma.SortOrder
   isDefault?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -498,9 +535,25 @@ export type StorageConnectionMinOrderByAggregateInput = {
   rootPrefix?: Prisma.SortOrder
   accessKeyEnc?: Prisma.SortOrder
   secretKeyEnc?: Prisma.SortOrder
+  credentialsClientEncrypted?: Prisma.SortOrder
   isDefault?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type StorageConnectionScalarRelationFilter = {
+  is?: Prisma.StorageConnectionWhereInput
+  isNot?: Prisma.StorageConnectionWhereInput
+}
+
+export type StorageConnectionListRelationFilter = {
+  every?: Prisma.StorageConnectionWhereInput
+  some?: Prisma.StorageConnectionWhereInput
+  none?: Prisma.StorageConnectionWhereInput
+}
+
+export type StorageConnectionOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type StringFieldUpdateOperationsInput = {
@@ -527,6 +580,455 @@ export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
 }
 
+export type StorageConnectionCreateNestedOneWithoutDriveObjectsInput = {
+  create?: Prisma.XOR<Prisma.StorageConnectionCreateWithoutDriveObjectsInput, Prisma.StorageConnectionUncheckedCreateWithoutDriveObjectsInput>
+  connectOrCreate?: Prisma.StorageConnectionCreateOrConnectWithoutDriveObjectsInput
+  connect?: Prisma.StorageConnectionWhereUniqueInput
+}
+
+export type StorageConnectionUpdateOneRequiredWithoutDriveObjectsNestedInput = {
+  create?: Prisma.XOR<Prisma.StorageConnectionCreateWithoutDriveObjectsInput, Prisma.StorageConnectionUncheckedCreateWithoutDriveObjectsInput>
+  connectOrCreate?: Prisma.StorageConnectionCreateOrConnectWithoutDriveObjectsInput
+  upsert?: Prisma.StorageConnectionUpsertWithoutDriveObjectsInput
+  connect?: Prisma.StorageConnectionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.StorageConnectionUpdateToOneWithWhereWithoutDriveObjectsInput, Prisma.StorageConnectionUpdateWithoutDriveObjectsInput>, Prisma.StorageConnectionUncheckedUpdateWithoutDriveObjectsInput>
+}
+
+export type StorageConnectionCreateNestedOneWithoutUploadSessionsInput = {
+  create?: Prisma.XOR<Prisma.StorageConnectionCreateWithoutUploadSessionsInput, Prisma.StorageConnectionUncheckedCreateWithoutUploadSessionsInput>
+  connectOrCreate?: Prisma.StorageConnectionCreateOrConnectWithoutUploadSessionsInput
+  connect?: Prisma.StorageConnectionWhereUniqueInput
+}
+
+export type StorageConnectionUpdateOneRequiredWithoutUploadSessionsNestedInput = {
+  create?: Prisma.XOR<Prisma.StorageConnectionCreateWithoutUploadSessionsInput, Prisma.StorageConnectionUncheckedCreateWithoutUploadSessionsInput>
+  connectOrCreate?: Prisma.StorageConnectionCreateOrConnectWithoutUploadSessionsInput
+  upsert?: Prisma.StorageConnectionUpsertWithoutUploadSessionsInput
+  connect?: Prisma.StorageConnectionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.StorageConnectionUpdateToOneWithWhereWithoutUploadSessionsInput, Prisma.StorageConnectionUpdateWithoutUploadSessionsInput>, Prisma.StorageConnectionUncheckedUpdateWithoutUploadSessionsInput>
+}
+
+export type StorageConnectionCreateNestedManyWithoutOwnerInput = {
+  create?: Prisma.XOR<Prisma.StorageConnectionCreateWithoutOwnerInput, Prisma.StorageConnectionUncheckedCreateWithoutOwnerInput> | Prisma.StorageConnectionCreateWithoutOwnerInput[] | Prisma.StorageConnectionUncheckedCreateWithoutOwnerInput[]
+  connectOrCreate?: Prisma.StorageConnectionCreateOrConnectWithoutOwnerInput | Prisma.StorageConnectionCreateOrConnectWithoutOwnerInput[]
+  createMany?: Prisma.StorageConnectionCreateManyOwnerInputEnvelope
+  connect?: Prisma.StorageConnectionWhereUniqueInput | Prisma.StorageConnectionWhereUniqueInput[]
+}
+
+export type StorageConnectionUncheckedCreateNestedManyWithoutOwnerInput = {
+  create?: Prisma.XOR<Prisma.StorageConnectionCreateWithoutOwnerInput, Prisma.StorageConnectionUncheckedCreateWithoutOwnerInput> | Prisma.StorageConnectionCreateWithoutOwnerInput[] | Prisma.StorageConnectionUncheckedCreateWithoutOwnerInput[]
+  connectOrCreate?: Prisma.StorageConnectionCreateOrConnectWithoutOwnerInput | Prisma.StorageConnectionCreateOrConnectWithoutOwnerInput[]
+  createMany?: Prisma.StorageConnectionCreateManyOwnerInputEnvelope
+  connect?: Prisma.StorageConnectionWhereUniqueInput | Prisma.StorageConnectionWhereUniqueInput[]
+}
+
+export type StorageConnectionUpdateManyWithoutOwnerNestedInput = {
+  create?: Prisma.XOR<Prisma.StorageConnectionCreateWithoutOwnerInput, Prisma.StorageConnectionUncheckedCreateWithoutOwnerInput> | Prisma.StorageConnectionCreateWithoutOwnerInput[] | Prisma.StorageConnectionUncheckedCreateWithoutOwnerInput[]
+  connectOrCreate?: Prisma.StorageConnectionCreateOrConnectWithoutOwnerInput | Prisma.StorageConnectionCreateOrConnectWithoutOwnerInput[]
+  upsert?: Prisma.StorageConnectionUpsertWithWhereUniqueWithoutOwnerInput | Prisma.StorageConnectionUpsertWithWhereUniqueWithoutOwnerInput[]
+  createMany?: Prisma.StorageConnectionCreateManyOwnerInputEnvelope
+  set?: Prisma.StorageConnectionWhereUniqueInput | Prisma.StorageConnectionWhereUniqueInput[]
+  disconnect?: Prisma.StorageConnectionWhereUniqueInput | Prisma.StorageConnectionWhereUniqueInput[]
+  delete?: Prisma.StorageConnectionWhereUniqueInput | Prisma.StorageConnectionWhereUniqueInput[]
+  connect?: Prisma.StorageConnectionWhereUniqueInput | Prisma.StorageConnectionWhereUniqueInput[]
+  update?: Prisma.StorageConnectionUpdateWithWhereUniqueWithoutOwnerInput | Prisma.StorageConnectionUpdateWithWhereUniqueWithoutOwnerInput[]
+  updateMany?: Prisma.StorageConnectionUpdateManyWithWhereWithoutOwnerInput | Prisma.StorageConnectionUpdateManyWithWhereWithoutOwnerInput[]
+  deleteMany?: Prisma.StorageConnectionScalarWhereInput | Prisma.StorageConnectionScalarWhereInput[]
+}
+
+export type StorageConnectionUncheckedUpdateManyWithoutOwnerNestedInput = {
+  create?: Prisma.XOR<Prisma.StorageConnectionCreateWithoutOwnerInput, Prisma.StorageConnectionUncheckedCreateWithoutOwnerInput> | Prisma.StorageConnectionCreateWithoutOwnerInput[] | Prisma.StorageConnectionUncheckedCreateWithoutOwnerInput[]
+  connectOrCreate?: Prisma.StorageConnectionCreateOrConnectWithoutOwnerInput | Prisma.StorageConnectionCreateOrConnectWithoutOwnerInput[]
+  upsert?: Prisma.StorageConnectionUpsertWithWhereUniqueWithoutOwnerInput | Prisma.StorageConnectionUpsertWithWhereUniqueWithoutOwnerInput[]
+  createMany?: Prisma.StorageConnectionCreateManyOwnerInputEnvelope
+  set?: Prisma.StorageConnectionWhereUniqueInput | Prisma.StorageConnectionWhereUniqueInput[]
+  disconnect?: Prisma.StorageConnectionWhereUniqueInput | Prisma.StorageConnectionWhereUniqueInput[]
+  delete?: Prisma.StorageConnectionWhereUniqueInput | Prisma.StorageConnectionWhereUniqueInput[]
+  connect?: Prisma.StorageConnectionWhereUniqueInput | Prisma.StorageConnectionWhereUniqueInput[]
+  update?: Prisma.StorageConnectionUpdateWithWhereUniqueWithoutOwnerInput | Prisma.StorageConnectionUpdateWithWhereUniqueWithoutOwnerInput[]
+  updateMany?: Prisma.StorageConnectionUpdateManyWithWhereWithoutOwnerInput | Prisma.StorageConnectionUpdateManyWithWhereWithoutOwnerInput[]
+  deleteMany?: Prisma.StorageConnectionScalarWhereInput | Prisma.StorageConnectionScalarWhereInput[]
+}
+
+export type StorageConnectionCreateWithoutDriveObjectsInput = {
+  id?: string
+  name: string
+  type: $Enums.StorageConnectionType
+  provider: $Enums.StorageProvider
+  bucketName: string
+  region?: string | null
+  endpoint?: string | null
+  rootPrefix?: string
+  accessKeyEnc?: string | null
+  secretKeyEnc?: string | null
+  credentialsClientEncrypted?: boolean
+  isDefault?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  owner: Prisma.UserCreateNestedOneWithoutStorageConnectionsInput
+  uploadSessions?: Prisma.UploadSessionCreateNestedManyWithoutConnectionInput
+}
+
+export type StorageConnectionUncheckedCreateWithoutDriveObjectsInput = {
+  id?: string
+  ownerId: string
+  name: string
+  type: $Enums.StorageConnectionType
+  provider: $Enums.StorageProvider
+  bucketName: string
+  region?: string | null
+  endpoint?: string | null
+  rootPrefix?: string
+  accessKeyEnc?: string | null
+  secretKeyEnc?: string | null
+  credentialsClientEncrypted?: boolean
+  isDefault?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  uploadSessions?: Prisma.UploadSessionUncheckedCreateNestedManyWithoutConnectionInput
+}
+
+export type StorageConnectionCreateOrConnectWithoutDriveObjectsInput = {
+  where: Prisma.StorageConnectionWhereUniqueInput
+  create: Prisma.XOR<Prisma.StorageConnectionCreateWithoutDriveObjectsInput, Prisma.StorageConnectionUncheckedCreateWithoutDriveObjectsInput>
+}
+
+export type StorageConnectionUpsertWithoutDriveObjectsInput = {
+  update: Prisma.XOR<Prisma.StorageConnectionUpdateWithoutDriveObjectsInput, Prisma.StorageConnectionUncheckedUpdateWithoutDriveObjectsInput>
+  create: Prisma.XOR<Prisma.StorageConnectionCreateWithoutDriveObjectsInput, Prisma.StorageConnectionUncheckedCreateWithoutDriveObjectsInput>
+  where?: Prisma.StorageConnectionWhereInput
+}
+
+export type StorageConnectionUpdateToOneWithWhereWithoutDriveObjectsInput = {
+  where?: Prisma.StorageConnectionWhereInput
+  data: Prisma.XOR<Prisma.StorageConnectionUpdateWithoutDriveObjectsInput, Prisma.StorageConnectionUncheckedUpdateWithoutDriveObjectsInput>
+}
+
+export type StorageConnectionUpdateWithoutDriveObjectsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumStorageConnectionTypeFieldUpdateOperationsInput | $Enums.StorageConnectionType
+  provider?: Prisma.EnumStorageProviderFieldUpdateOperationsInput | $Enums.StorageProvider
+  bucketName?: Prisma.StringFieldUpdateOperationsInput | string
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  endpoint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rootPrefix?: Prisma.StringFieldUpdateOperationsInput | string
+  accessKeyEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  secretKeyEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  credentialsClientEncrypted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDefault?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  owner?: Prisma.UserUpdateOneRequiredWithoutStorageConnectionsNestedInput
+  uploadSessions?: Prisma.UploadSessionUpdateManyWithoutConnectionNestedInput
+}
+
+export type StorageConnectionUncheckedUpdateWithoutDriveObjectsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumStorageConnectionTypeFieldUpdateOperationsInput | $Enums.StorageConnectionType
+  provider?: Prisma.EnumStorageProviderFieldUpdateOperationsInput | $Enums.StorageProvider
+  bucketName?: Prisma.StringFieldUpdateOperationsInput | string
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  endpoint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rootPrefix?: Prisma.StringFieldUpdateOperationsInput | string
+  accessKeyEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  secretKeyEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  credentialsClientEncrypted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDefault?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  uploadSessions?: Prisma.UploadSessionUncheckedUpdateManyWithoutConnectionNestedInput
+}
+
+export type StorageConnectionCreateWithoutUploadSessionsInput = {
+  id?: string
+  name: string
+  type: $Enums.StorageConnectionType
+  provider: $Enums.StorageProvider
+  bucketName: string
+  region?: string | null
+  endpoint?: string | null
+  rootPrefix?: string
+  accessKeyEnc?: string | null
+  secretKeyEnc?: string | null
+  credentialsClientEncrypted?: boolean
+  isDefault?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  owner: Prisma.UserCreateNestedOneWithoutStorageConnectionsInput
+  driveObjects?: Prisma.DriveObjectCreateNestedManyWithoutConnectionInput
+}
+
+export type StorageConnectionUncheckedCreateWithoutUploadSessionsInput = {
+  id?: string
+  ownerId: string
+  name: string
+  type: $Enums.StorageConnectionType
+  provider: $Enums.StorageProvider
+  bucketName: string
+  region?: string | null
+  endpoint?: string | null
+  rootPrefix?: string
+  accessKeyEnc?: string | null
+  secretKeyEnc?: string | null
+  credentialsClientEncrypted?: boolean
+  isDefault?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  driveObjects?: Prisma.DriveObjectUncheckedCreateNestedManyWithoutConnectionInput
+}
+
+export type StorageConnectionCreateOrConnectWithoutUploadSessionsInput = {
+  where: Prisma.StorageConnectionWhereUniqueInput
+  create: Prisma.XOR<Prisma.StorageConnectionCreateWithoutUploadSessionsInput, Prisma.StorageConnectionUncheckedCreateWithoutUploadSessionsInput>
+}
+
+export type StorageConnectionUpsertWithoutUploadSessionsInput = {
+  update: Prisma.XOR<Prisma.StorageConnectionUpdateWithoutUploadSessionsInput, Prisma.StorageConnectionUncheckedUpdateWithoutUploadSessionsInput>
+  create: Prisma.XOR<Prisma.StorageConnectionCreateWithoutUploadSessionsInput, Prisma.StorageConnectionUncheckedCreateWithoutUploadSessionsInput>
+  where?: Prisma.StorageConnectionWhereInput
+}
+
+export type StorageConnectionUpdateToOneWithWhereWithoutUploadSessionsInput = {
+  where?: Prisma.StorageConnectionWhereInput
+  data: Prisma.XOR<Prisma.StorageConnectionUpdateWithoutUploadSessionsInput, Prisma.StorageConnectionUncheckedUpdateWithoutUploadSessionsInput>
+}
+
+export type StorageConnectionUpdateWithoutUploadSessionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumStorageConnectionTypeFieldUpdateOperationsInput | $Enums.StorageConnectionType
+  provider?: Prisma.EnumStorageProviderFieldUpdateOperationsInput | $Enums.StorageProvider
+  bucketName?: Prisma.StringFieldUpdateOperationsInput | string
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  endpoint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rootPrefix?: Prisma.StringFieldUpdateOperationsInput | string
+  accessKeyEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  secretKeyEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  credentialsClientEncrypted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDefault?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  owner?: Prisma.UserUpdateOneRequiredWithoutStorageConnectionsNestedInput
+  driveObjects?: Prisma.DriveObjectUpdateManyWithoutConnectionNestedInput
+}
+
+export type StorageConnectionUncheckedUpdateWithoutUploadSessionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumStorageConnectionTypeFieldUpdateOperationsInput | $Enums.StorageConnectionType
+  provider?: Prisma.EnumStorageProviderFieldUpdateOperationsInput | $Enums.StorageProvider
+  bucketName?: Prisma.StringFieldUpdateOperationsInput | string
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  endpoint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rootPrefix?: Prisma.StringFieldUpdateOperationsInput | string
+  accessKeyEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  secretKeyEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  credentialsClientEncrypted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDefault?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  driveObjects?: Prisma.DriveObjectUncheckedUpdateManyWithoutConnectionNestedInput
+}
+
+export type StorageConnectionCreateWithoutOwnerInput = {
+  id?: string
+  name: string
+  type: $Enums.StorageConnectionType
+  provider: $Enums.StorageProvider
+  bucketName: string
+  region?: string | null
+  endpoint?: string | null
+  rootPrefix?: string
+  accessKeyEnc?: string | null
+  secretKeyEnc?: string | null
+  credentialsClientEncrypted?: boolean
+  isDefault?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  driveObjects?: Prisma.DriveObjectCreateNestedManyWithoutConnectionInput
+  uploadSessions?: Prisma.UploadSessionCreateNestedManyWithoutConnectionInput
+}
+
+export type StorageConnectionUncheckedCreateWithoutOwnerInput = {
+  id?: string
+  name: string
+  type: $Enums.StorageConnectionType
+  provider: $Enums.StorageProvider
+  bucketName: string
+  region?: string | null
+  endpoint?: string | null
+  rootPrefix?: string
+  accessKeyEnc?: string | null
+  secretKeyEnc?: string | null
+  credentialsClientEncrypted?: boolean
+  isDefault?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  driveObjects?: Prisma.DriveObjectUncheckedCreateNestedManyWithoutConnectionInput
+  uploadSessions?: Prisma.UploadSessionUncheckedCreateNestedManyWithoutConnectionInput
+}
+
+export type StorageConnectionCreateOrConnectWithoutOwnerInput = {
+  where: Prisma.StorageConnectionWhereUniqueInput
+  create: Prisma.XOR<Prisma.StorageConnectionCreateWithoutOwnerInput, Prisma.StorageConnectionUncheckedCreateWithoutOwnerInput>
+}
+
+export type StorageConnectionCreateManyOwnerInputEnvelope = {
+  data: Prisma.StorageConnectionCreateManyOwnerInput | Prisma.StorageConnectionCreateManyOwnerInput[]
+  skipDuplicates?: boolean
+}
+
+export type StorageConnectionUpsertWithWhereUniqueWithoutOwnerInput = {
+  where: Prisma.StorageConnectionWhereUniqueInput
+  update: Prisma.XOR<Prisma.StorageConnectionUpdateWithoutOwnerInput, Prisma.StorageConnectionUncheckedUpdateWithoutOwnerInput>
+  create: Prisma.XOR<Prisma.StorageConnectionCreateWithoutOwnerInput, Prisma.StorageConnectionUncheckedCreateWithoutOwnerInput>
+}
+
+export type StorageConnectionUpdateWithWhereUniqueWithoutOwnerInput = {
+  where: Prisma.StorageConnectionWhereUniqueInput
+  data: Prisma.XOR<Prisma.StorageConnectionUpdateWithoutOwnerInput, Prisma.StorageConnectionUncheckedUpdateWithoutOwnerInput>
+}
+
+export type StorageConnectionUpdateManyWithWhereWithoutOwnerInput = {
+  where: Prisma.StorageConnectionScalarWhereInput
+  data: Prisma.XOR<Prisma.StorageConnectionUpdateManyMutationInput, Prisma.StorageConnectionUncheckedUpdateManyWithoutOwnerInput>
+}
+
+export type StorageConnectionScalarWhereInput = {
+  AND?: Prisma.StorageConnectionScalarWhereInput | Prisma.StorageConnectionScalarWhereInput[]
+  OR?: Prisma.StorageConnectionScalarWhereInput[]
+  NOT?: Prisma.StorageConnectionScalarWhereInput | Prisma.StorageConnectionScalarWhereInput[]
+  id?: Prisma.StringFilter<"StorageConnection"> | string
+  ownerId?: Prisma.StringFilter<"StorageConnection"> | string
+  name?: Prisma.StringFilter<"StorageConnection"> | string
+  type?: Prisma.EnumStorageConnectionTypeFilter<"StorageConnection"> | $Enums.StorageConnectionType
+  provider?: Prisma.EnumStorageProviderFilter<"StorageConnection"> | $Enums.StorageProvider
+  bucketName?: Prisma.StringFilter<"StorageConnection"> | string
+  region?: Prisma.StringNullableFilter<"StorageConnection"> | string | null
+  endpoint?: Prisma.StringNullableFilter<"StorageConnection"> | string | null
+  rootPrefix?: Prisma.StringFilter<"StorageConnection"> | string
+  accessKeyEnc?: Prisma.StringNullableFilter<"StorageConnection"> | string | null
+  secretKeyEnc?: Prisma.StringNullableFilter<"StorageConnection"> | string | null
+  credentialsClientEncrypted?: Prisma.BoolFilter<"StorageConnection"> | boolean
+  isDefault?: Prisma.BoolFilter<"StorageConnection"> | boolean
+  createdAt?: Prisma.DateTimeFilter<"StorageConnection"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"StorageConnection"> | Date | string
+}
+
+export type StorageConnectionCreateManyOwnerInput = {
+  id?: string
+  name: string
+  type: $Enums.StorageConnectionType
+  provider: $Enums.StorageProvider
+  bucketName: string
+  region?: string | null
+  endpoint?: string | null
+  rootPrefix?: string
+  accessKeyEnc?: string | null
+  secretKeyEnc?: string | null
+  credentialsClientEncrypted?: boolean
+  isDefault?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type StorageConnectionUpdateWithoutOwnerInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumStorageConnectionTypeFieldUpdateOperationsInput | $Enums.StorageConnectionType
+  provider?: Prisma.EnumStorageProviderFieldUpdateOperationsInput | $Enums.StorageProvider
+  bucketName?: Prisma.StringFieldUpdateOperationsInput | string
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  endpoint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rootPrefix?: Prisma.StringFieldUpdateOperationsInput | string
+  accessKeyEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  secretKeyEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  credentialsClientEncrypted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDefault?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  driveObjects?: Prisma.DriveObjectUpdateManyWithoutConnectionNestedInput
+  uploadSessions?: Prisma.UploadSessionUpdateManyWithoutConnectionNestedInput
+}
+
+export type StorageConnectionUncheckedUpdateWithoutOwnerInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumStorageConnectionTypeFieldUpdateOperationsInput | $Enums.StorageConnectionType
+  provider?: Prisma.EnumStorageProviderFieldUpdateOperationsInput | $Enums.StorageProvider
+  bucketName?: Prisma.StringFieldUpdateOperationsInput | string
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  endpoint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rootPrefix?: Prisma.StringFieldUpdateOperationsInput | string
+  accessKeyEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  secretKeyEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  credentialsClientEncrypted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDefault?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  driveObjects?: Prisma.DriveObjectUncheckedUpdateManyWithoutConnectionNestedInput
+  uploadSessions?: Prisma.UploadSessionUncheckedUpdateManyWithoutConnectionNestedInput
+}
+
+export type StorageConnectionUncheckedUpdateManyWithoutOwnerInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.EnumStorageConnectionTypeFieldUpdateOperationsInput | $Enums.StorageConnectionType
+  provider?: Prisma.EnumStorageProviderFieldUpdateOperationsInput | $Enums.StorageProvider
+  bucketName?: Prisma.StringFieldUpdateOperationsInput | string
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  endpoint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rootPrefix?: Prisma.StringFieldUpdateOperationsInput | string
+  accessKeyEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  secretKeyEnc?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  credentialsClientEncrypted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDefault?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+
+/**
+ * Count Type StorageConnectionCountOutputType
+ */
+
+export type StorageConnectionCountOutputType = {
+  driveObjects: number
+  uploadSessions: number
+}
+
+export type StorageConnectionCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  driveObjects?: boolean | StorageConnectionCountOutputTypeCountDriveObjectsArgs
+  uploadSessions?: boolean | StorageConnectionCountOutputTypeCountUploadSessionsArgs
+}
+
+/**
+ * StorageConnectionCountOutputType without action
+ */
+export type StorageConnectionCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the StorageConnectionCountOutputType
+   */
+  select?: Prisma.StorageConnectionCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * StorageConnectionCountOutputType without action
+ */
+export type StorageConnectionCountOutputTypeCountDriveObjectsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.DriveObjectWhereInput
+}
+
+/**
+ * StorageConnectionCountOutputType without action
+ */
+export type StorageConnectionCountOutputTypeCountUploadSessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.UploadSessionWhereInput
+}
 
 
 export type StorageConnectionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -541,9 +1043,14 @@ export type StorageConnectionSelect<ExtArgs extends runtime.Types.Extensions.Int
   rootPrefix?: boolean
   accessKeyEnc?: boolean
   secretKeyEnc?: boolean
+  credentialsClientEncrypted?: boolean
   isDefault?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  driveObjects?: boolean | Prisma.StorageConnection$driveObjectsArgs<ExtArgs>
+  uploadSessions?: boolean | Prisma.StorageConnection$uploadSessionsArgs<ExtArgs>
+  _count?: boolean | Prisma.StorageConnectionCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["storageConnection"]>
 
 export type StorageConnectionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -558,9 +1065,11 @@ export type StorageConnectionSelectCreateManyAndReturn<ExtArgs extends runtime.T
   rootPrefix?: boolean
   accessKeyEnc?: boolean
   secretKeyEnc?: boolean
+  credentialsClientEncrypted?: boolean
   isDefault?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["storageConnection"]>
 
 export type StorageConnectionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -575,9 +1084,11 @@ export type StorageConnectionSelectUpdateManyAndReturn<ExtArgs extends runtime.T
   rootPrefix?: boolean
   accessKeyEnc?: boolean
   secretKeyEnc?: boolean
+  credentialsClientEncrypted?: boolean
   isDefault?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["storageConnection"]>
 
 export type StorageConnectionSelectScalar = {
@@ -592,16 +1103,33 @@ export type StorageConnectionSelectScalar = {
   rootPrefix?: boolean
   accessKeyEnc?: boolean
   secretKeyEnc?: boolean
+  credentialsClientEncrypted?: boolean
   isDefault?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type StorageConnectionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "ownerId" | "name" | "type" | "provider" | "bucketName" | "region" | "endpoint" | "rootPrefix" | "accessKeyEnc" | "secretKeyEnc" | "isDefault" | "createdAt" | "updatedAt", ExtArgs["result"]["storageConnection"]>
+export type StorageConnectionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "ownerId" | "name" | "type" | "provider" | "bucketName" | "region" | "endpoint" | "rootPrefix" | "accessKeyEnc" | "secretKeyEnc" | "credentialsClientEncrypted" | "isDefault" | "createdAt" | "updatedAt", ExtArgs["result"]["storageConnection"]>
+export type StorageConnectionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  driveObjects?: boolean | Prisma.StorageConnection$driveObjectsArgs<ExtArgs>
+  uploadSessions?: boolean | Prisma.StorageConnection$uploadSessionsArgs<ExtArgs>
+  _count?: boolean | Prisma.StorageConnectionCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type StorageConnectionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}
+export type StorageConnectionIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+}
 
 export type $StorageConnectionPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "StorageConnection"
-  objects: {}
+  objects: {
+    owner: Prisma.$UserPayload<ExtArgs>
+    driveObjects: Prisma.$DriveObjectPayload<ExtArgs>[]
+    uploadSessions: Prisma.$UploadSessionPayload<ExtArgs>[]
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     ownerId: string
@@ -614,6 +1142,7 @@ export type $StorageConnectionPayload<ExtArgs extends runtime.Types.Extensions.I
     rootPrefix: string
     accessKeyEnc: string | null
     secretKeyEnc: string | null
+    credentialsClientEncrypted: boolean
     isDefault: boolean
     createdAt: Date
     updatedAt: Date
@@ -1011,6 +1540,9 @@ readonly fields: StorageConnectionFieldRefs;
  */
 export interface Prisma__StorageConnectionClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  owner<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  driveObjects<T extends Prisma.StorageConnection$driveObjectsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.StorageConnection$driveObjectsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DriveObjectPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  uploadSessions<T extends Prisma.StorageConnection$uploadSessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.StorageConnection$uploadSessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UploadSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1051,6 +1583,7 @@ export interface StorageConnectionFieldRefs {
   readonly rootPrefix: Prisma.FieldRef<"StorageConnection", 'String'>
   readonly accessKeyEnc: Prisma.FieldRef<"StorageConnection", 'String'>
   readonly secretKeyEnc: Prisma.FieldRef<"StorageConnection", 'String'>
+  readonly credentialsClientEncrypted: Prisma.FieldRef<"StorageConnection", 'Boolean'>
   readonly isDefault: Prisma.FieldRef<"StorageConnection", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"StorageConnection", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"StorageConnection", 'DateTime'>
@@ -1071,6 +1604,10 @@ export type StorageConnectionFindUniqueArgs<ExtArgs extends runtime.Types.Extens
    */
   omit?: Prisma.StorageConnectionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StorageConnectionInclude<ExtArgs> | null
+  /**
    * Filter, which StorageConnection to fetch.
    */
   where: Prisma.StorageConnectionWhereUniqueInput
@@ -1089,6 +1626,10 @@ export type StorageConnectionFindUniqueOrThrowArgs<ExtArgs extends runtime.Types
    */
   omit?: Prisma.StorageConnectionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StorageConnectionInclude<ExtArgs> | null
+  /**
    * Filter, which StorageConnection to fetch.
    */
   where: Prisma.StorageConnectionWhereUniqueInput
@@ -1106,6 +1647,10 @@ export type StorageConnectionFindFirstArgs<ExtArgs extends runtime.Types.Extensi
    * Omit specific fields from the StorageConnection
    */
   omit?: Prisma.StorageConnectionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StorageConnectionInclude<ExtArgs> | null
   /**
    * Filter, which StorageConnection to fetch.
    */
@@ -1155,6 +1700,10 @@ export type StorageConnectionFindFirstOrThrowArgs<ExtArgs extends runtime.Types.
    */
   omit?: Prisma.StorageConnectionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StorageConnectionInclude<ExtArgs> | null
+  /**
    * Filter, which StorageConnection to fetch.
    */
   where?: Prisma.StorageConnectionWhereInput
@@ -1202,6 +1751,10 @@ export type StorageConnectionFindManyArgs<ExtArgs extends runtime.Types.Extensio
    * Omit specific fields from the StorageConnection
    */
   omit?: Prisma.StorageConnectionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StorageConnectionInclude<ExtArgs> | null
   /**
    * Filter, which StorageConnections to fetch.
    */
@@ -1251,6 +1804,10 @@ export type StorageConnectionCreateArgs<ExtArgs extends runtime.Types.Extensions
    */
   omit?: Prisma.StorageConnectionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StorageConnectionInclude<ExtArgs> | null
+  /**
    * The data needed to create a StorageConnection.
    */
   data: Prisma.XOR<Prisma.StorageConnectionCreateInput, Prisma.StorageConnectionUncheckedCreateInput>
@@ -1284,6 +1841,10 @@ export type StorageConnectionCreateManyAndReturnArgs<ExtArgs extends runtime.Typ
    */
   data: Prisma.StorageConnectionCreateManyInput | Prisma.StorageConnectionCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StorageConnectionIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1298,6 +1859,10 @@ export type StorageConnectionUpdateArgs<ExtArgs extends runtime.Types.Extensions
    * Omit specific fields from the StorageConnection
    */
   omit?: Prisma.StorageConnectionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StorageConnectionInclude<ExtArgs> | null
   /**
    * The data needed to update a StorageConnection.
    */
@@ -1350,6 +1915,10 @@ export type StorageConnectionUpdateManyAndReturnArgs<ExtArgs extends runtime.Typ
    * Limit how many StorageConnections to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StorageConnectionIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1364,6 +1933,10 @@ export type StorageConnectionUpsertArgs<ExtArgs extends runtime.Types.Extensions
    * Omit specific fields from the StorageConnection
    */
   omit?: Prisma.StorageConnectionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StorageConnectionInclude<ExtArgs> | null
   /**
    * The filter to search for the StorageConnection to update in case it exists.
    */
@@ -1391,6 +1964,10 @@ export type StorageConnectionDeleteArgs<ExtArgs extends runtime.Types.Extensions
    */
   omit?: Prisma.StorageConnectionOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StorageConnectionInclude<ExtArgs> | null
+  /**
    * Filter which StorageConnection to delete.
    */
   where: Prisma.StorageConnectionWhereUniqueInput
@@ -1411,6 +1988,54 @@ export type StorageConnectionDeleteManyArgs<ExtArgs extends runtime.Types.Extens
 }
 
 /**
+ * StorageConnection.driveObjects
+ */
+export type StorageConnection$driveObjectsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the DriveObject
+   */
+  select?: Prisma.DriveObjectSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the DriveObject
+   */
+  omit?: Prisma.DriveObjectOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DriveObjectInclude<ExtArgs> | null
+  where?: Prisma.DriveObjectWhereInput
+  orderBy?: Prisma.DriveObjectOrderByWithRelationInput | Prisma.DriveObjectOrderByWithRelationInput[]
+  cursor?: Prisma.DriveObjectWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.DriveObjectScalarFieldEnum | Prisma.DriveObjectScalarFieldEnum[]
+}
+
+/**
+ * StorageConnection.uploadSessions
+ */
+export type StorageConnection$uploadSessionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the UploadSession
+   */
+  select?: Prisma.UploadSessionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the UploadSession
+   */
+  omit?: Prisma.UploadSessionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UploadSessionInclude<ExtArgs> | null
+  where?: Prisma.UploadSessionWhereInput
+  orderBy?: Prisma.UploadSessionOrderByWithRelationInput | Prisma.UploadSessionOrderByWithRelationInput[]
+  cursor?: Prisma.UploadSessionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.UploadSessionScalarFieldEnum | Prisma.UploadSessionScalarFieldEnum[]
+}
+
+/**
  * StorageConnection without action
  */
 export type StorageConnectionDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1422,4 +2047,8 @@ export type StorageConnectionDefaultArgs<ExtArgs extends runtime.Types.Extension
    * Omit specific fields from the StorageConnection
    */
   omit?: Prisma.StorageConnectionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StorageConnectionInclude<ExtArgs> | null
 }
