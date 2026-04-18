@@ -65,6 +65,123 @@ function resolveProviderSettings(input: {
   };
 }
 
+function getErrorString(error: unknown, key: string) {
+  if (!error || typeof error !== "object" || !(key in error)) {
+    return "";
+  }
+
+  const value = (error as Record<string, unknown>)[key];
+  return typeof value === "string" ? value : "";
+}
+
+function getErrorNumber(error: unknown, key: string) {
+  if (!error || typeof error !== "object" || !(key in error)) {
+    return null;
+  }
+
+  const value = (error as Record<string, unknown>)[key];
+  return typeof value === "number" ? value : null;
+}
+
+function getErrorMetadata(error: unknown) {
+  if (!error || typeof error !== "object" || !("$metadata" in error)) {
+    return null;
+  }
+
+  const value = (error as Record<string, unknown>).$metadata;
+  return value && typeof value === "object"
+    ? (value as Record<string, unknown>)
+    : null;
+}
+
+function getConnectionErrorDetails(error: unknown) {
+  const metadata = getErrorMetadata(error);
+
+  return {
+    name: getErrorString(error, "name") || (error instanceof Error ? error.name : ""),
+    message: getErrorString(error, "message") || (error instanceof Error ? error.message : ""),
+    code: getErrorString(error, "code"),
+    errno: getErrorNumber(error, "errno"),
+    syscall: getErrorString(error, "syscall"),
+    hostname: getErrorString(error, "hostname"),
+    fault: getErrorString(error, "$fault"),
+    httpStatusCode:
+      metadata && typeof metadata.httpStatusCode === "number"
+        ? metadata.httpStatusCode
+        : null,
+    requestId:
+      metadata && typeof metadata.requestId === "string"
+        ? metadata.requestId
+        : null,
+    extendedRequestId:
+      metadata && typeof metadata.extendedRequestId === "string"
+        ? metadata.extendedRequestId
+        : null,
+    attempts:
+      metadata && typeof metadata.attempts === "number"
+        ? metadata.attempts
+        : null,
+    totalRetryDelay:
+      metadata && typeof metadata.totalRetryDelay === "number"
+        ? metadata.totalRetryDelay
+        : null,
+  };
+}
+
+function formatConnectionErrorMessage(input: {
+  provider: "s3" | "r2" | "wasabi";
+  region: string | null;
+  endpoint: string | null;
+  error: unknown;
+}) {
+  const details = getConnectionErrorDetails(input.error);
+  const normalizedMessage = `${details.name} ${details.code} ${details.message}`.toLowerCase();
+
+  if (
+    normalizedMessage.includes("getaddrinfo enotfound") ||
+    normalizedMessage.includes("enotfound") ||
+    details.name === "UnknownEndpoint"
+  ) {
+    if (input.provider === "wasabi") {
+      return input.endpoint
+        ? "We could not reach that Wasabi endpoint. Double-check the region or enter the exact endpoint from Wasabi."
+        : "We could not reach the Wasabi endpoint for that region. Double-check the region or enter the exact Wasabi endpoint manually.";
+    }
+
+    if (input.provider === "r2") {
+      return "We could not reach that Cloudflare R2 endpoint. Check the endpoint URL and try again.";
+    }
+
+    return "We could not reach that bucket endpoint. Check the region or endpoint and try again.";
+  }
+
+  if (
+    details.httpStatusCode === 401 ||
+    details.httpStatusCode === 403 ||
+    details.name === "InvalidAccessKeyId" ||
+    details.name === "SignatureDoesNotMatch" ||
+    details.name === "AccessDenied" ||
+    normalizedMessage.includes("access denied") ||
+    normalizedMessage.includes("signature") ||
+    normalizedMessage.includes("invalidaccesskeyid")
+  ) {
+    return "Those bucket credentials were rejected. Check the access key, secret key, bucket permissions, and region.";
+  }
+
+  if (
+    details.name === "NoSuchBucket" ||
+    (normalizedMessage.includes("bucket") && normalizedMessage.includes("not exist"))
+  ) {
+    return "That bucket could not be found. Check the bucket name, region, and endpoint.";
+  }
+
+  if (details.name === "PermanentRedirect" || normalizedMessage.includes("redirect")) {
+    return "That bucket appears to be in a different region or endpoint. Double-check the region and endpoint settings.";
+  }
+
+  return details.message || "Failed to create connection";
+}
+
 export async function GET(request: Request) {
   try {
     const session = await auth.api.getSession({ headers: request.headers });
@@ -89,6 +206,11 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  let provider: "s3" | "r2" | "wasabi" | null = null;
+  let region: string | null = null;
+  let endpoint: string | null = null;
+  let bucketName: string | null = null;
+
   try {
     const session = await auth.api.getSession({ headers: request.headers });
 
@@ -97,7 +219,12 @@ export async function POST(request: Request) {
     }
 
     const body = createConnectionSchema.parse(await request.json());
+    provider = body.provider;
+    bucketName = body.bucketName.trim();
+
     const providerSettings = resolveProviderSettings(body);
+    region = providerSettings.region;
+    endpoint = providerSettings.endpoint;
     const rootPrefix = normalizeFolderPath(body.rootPrefix);
 
     if (body.provider === "r2" && !providerSettings.endpoint) {
@@ -112,7 +239,7 @@ export async function POST(request: Request) {
         ownerId: session.user.id,
         type: "external",
         provider: body.provider,
-        bucketName: body.bucketName.trim(),
+        bucketName,
         endpoint: providerSettings.endpoint,
         rootPrefix,
       },
@@ -135,13 +262,13 @@ export async function POST(request: Request) {
 
     await client.send(
       new HeadBucketCommand({
-        Bucket: body.bucketName.trim(),
+        Bucket: bucketName,
       }),
     );
 
     await client.send(
       new ListObjectsV2Command({
-        Bucket: body.bucketName.trim(),
+        Bucket: bucketName,
         Prefix: rootPrefix ? `${rootPrefix}/` : undefined,
         MaxKeys: 1,
       }),
@@ -158,7 +285,7 @@ export async function POST(request: Request) {
           data: {
             name: body.name.trim(),
             provider: body.provider,
-            bucketName: body.bucketName.trim(),
+            bucketName,
             region: providerSettings.region,
             endpoint: providerSettings.endpoint,
             rootPrefix,
@@ -173,7 +300,7 @@ export async function POST(request: Request) {
             name: body.name.trim(),
             type: "external",
             provider: body.provider,
-            bucketName: body.bucketName.trim(),
+            bucketName,
             region: providerSettings.region,
             endpoint: providerSettings.endpoint,
             rootPrefix,
@@ -189,9 +316,31 @@ export async function POST(request: Request) {
       connection: toPublicStorageConnection(connection),
     });
   } catch (error) {
-    console.error("connections POST route error", error);
+    console.error("connections POST route error", {
+      provider,
+      region,
+      endpoint,
+      bucketName,
+      error: getConnectionErrorDetails(error),
+    });
+
+    if (error instanceof z.ZodError) {
+      return Response.json(
+        { error: error.issues[0]?.message || "Invalid bucket connection input" },
+        { status: 400 },
+      );
+    }
+
     return Response.json(
-      { error: error instanceof Error ? error.message : "Failed to create connection" },
+      {
+        error:
+          provider && (provider === "s3" || provider === "r2" || provider === "wasabi")
+            ? formatConnectionErrorMessage({ provider, region, endpoint, error })
+            : error instanceof Error
+              ? error.message
+              : "Failed to create connection",
+        debug: getConnectionErrorDetails(error),
+      },
       { status: 500 },
     );
   }

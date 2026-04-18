@@ -2589,8 +2589,35 @@ export function DashboardClient({
 
       if (!response.ok) {
         const errorData = (await response.json().catch(() => null)) as
-          | { error?: string }
+          | {
+              error?: string;
+              debug?: {
+                name?: string;
+                message?: string;
+                code?: string;
+                errno?: number | null;
+                syscall?: string;
+                hostname?: string;
+                fault?: string;
+                httpStatusCode?: number | null;
+                requestId?: string | null;
+                extendedRequestId?: string | null;
+                attempts?: number | null;
+                totalRetryDelay?: number | null;
+              };
+            }
           | null;
+
+        console.error("create connection response error", {
+          status: response.status,
+          provider: connectionForm.provider,
+          bucketName,
+          region: connectionForm.region,
+          endpoint: connectionForm.endpoint,
+          error: errorData?.error,
+          debug: errorData?.debug,
+        });
+
         throw new Error(errorData?.error || "Could not add bucket");
       }
 
@@ -3427,7 +3454,7 @@ export function DashboardClient({
                           role="button"
                           tabIndex={0}
                           className={cn(
-                            "grid w-full grid-cols-[28px_minmax(0,1fr)_40px] gap-3 border-b border-border px-4 py-3 text-left transition-colors hover:bg-accent/50 md:grid-cols-[28px_minmax(0,1.7fr)_120px_160px_56px] md:gap-4",
+                            "grid w-full cursor-pointer grid-cols-[28px_minmax(0,1fr)_40px] gap-3 border-b border-border px-4 py-3 text-left transition-colors hover:bg-accent/50 md:grid-cols-[28px_minmax(0,1.7fr)_120px_160px_56px] md:gap-4",
                             selectedIds.has(item.id) && "bg-accent/35",
                           )}
                           onClick={rowAction}
@@ -3575,7 +3602,7 @@ export function DashboardClient({
                             role="button"
                             tabIndex={0}
                             className={cn(
-                              "group relative flex min-h-24 flex-col rounded-lg border border-border bg-background p-2.5 text-left transition-colors hover:border-foreground/20",
+                              "group relative flex min-h-24 cursor-pointer flex-col rounded-lg border border-border bg-background p-2.5 text-left transition-colors hover:border-foreground/20",
                               selectedIds.has(item.id) && "border-foreground/25 bg-accent/10",
                             )}
                             onClick={cardAction}
