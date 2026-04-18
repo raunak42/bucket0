@@ -1,7 +1,9 @@
-import { prisma } from "@/utils/prisma";
-import { createManagedS3Client, createS3Client } from "@/utils/s3";
 import { auth } from "@/utils/auth";
+import { prisma } from "@/utils/prisma";
 import { getStorageConnectionWithCredentialsForUser } from "@/utils/storage";
+import { createManagedS3Client, createS3Client } from "@/utils/s3";
+import { Readable } from "node:stream";
+import type { ReadableStream as NodeReadableStream } from "node:stream/web";
 
 export async function getAuthenticatedUploadUser(request: Request) {
   const session = await auth.api.getSession({ headers: request.headers });
@@ -71,4 +73,48 @@ export async function getStorageContextForUploadId({
     ...context,
     uploadSession,
   };
+}
+
+export function getUploadRequestBodyStream(request: Request) {
+  if (!request.body) {
+    throw new Error("Missing upload body");
+  }
+
+  return Readable.fromWeb(
+    request.body as NodeReadableStream<Uint8Array>,
+  );
+}
+
+export function getRequestContentLength(request: Request) {
+  const rawContentLength = request.headers.get("content-length");
+
+  if (!rawContentLength) {
+    return undefined;
+  }
+
+  const parsed = Number.parseInt(rawContentLength, 10);
+  if (!Number.isFinite(parsed) || parsed < 0) {
+    return undefined;
+  }
+
+  return parsed;
+}
+
+export function getExpectedUploadPartSize({
+  totalSize,
+  partSize,
+  partNumber,
+}: {
+  totalSize: number;
+  partSize: number;
+  partNumber: number;
+}) {
+  const start = (partNumber - 1) * partSize;
+
+  if (start >= totalSize) {
+    return null;
+  }
+
+  const end = Math.min(start + partSize, totalSize);
+  return end - start;
 }

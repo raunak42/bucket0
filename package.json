@@ -6,7 +6,9 @@
     "dev": "next dev --webpack",
     "dev:turbo": "next dev",
     "build": "next build",
+    "build:railway": "next build && node scripts/prepare-standalone.mjs",
     "start": "next start",
+    "start:railway": "HOSTNAME=0.0.0.0 node .next/standalone/server.js",
     "lint": "eslint",
     "s3:cors": "node scripts/configure-s3-cors.mjs"
   },

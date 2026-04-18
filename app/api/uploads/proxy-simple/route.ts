@@ -3,7 +3,9 @@ import { PutObjectCommand } from "@/utils/s3";
 import { z } from "zod";
 import {
   getAuthenticatedUploadUser,
+  getRequestContentLength,
   getStorageContextForUploadId,
+  getUploadRequestBodyStream,
 } from "../_shared";
 
 export const runtime = "nodejs";
@@ -21,13 +23,13 @@ export async function POST(request: Request) {
     }
 
     const { searchParams } = new URL(request.url);
-    const body = proxySimpleSchema.parse({
+    const params = proxySimpleSchema.parse({
       uploadId: searchParams.get("uploadId"),
     });
 
     const context = await getStorageContextForUploadId({
       userId: user.userId,
-      uploadId: body.uploadId,
+      uploadId: params.uploadId,
     });
 
     if (!context) {
@@ -48,21 +50,40 @@ export async function POST(request: Request) {
       );
     }
 
+    const expectedSize = Number(context.uploadSession.size);
+    const requestContentLength = getRequestContentLength(request);
+
+    if (
+      requestContentLength !== undefined &&
+      requestContentLength !== expectedSize
+    ) {
+      return Response.json(
+        { error: "Upload size mismatch" },
+        { status: 400 },
+      );
+    }
+
+    const requestBody =
+      expectedSize === 0
+        ? new Uint8Array(0)
+        : getUploadRequestBodyStream(request);
+
     await prisma.uploadSession.update({
       where: { id: context.uploadSession.id },
       data: { status: "uploading" },
     });
 
-    const bytes = Buffer.from(await request.arrayBuffer());
-
     await context.s3Client.send(
       new PutObjectCommand({
         Bucket: context.bucketName,
         Key: context.uploadSession.key,
-        Body: bytes,
-        ContentLength: bytes.byteLength,
+        Body: requestBody,
+        ContentLength: expectedSize,
         ContentType: context.uploadSession.mimeType,
       }),
+      {
+        abortSignal: request.signal,
+      },
     );
 
     return Response.json({ ok: true });

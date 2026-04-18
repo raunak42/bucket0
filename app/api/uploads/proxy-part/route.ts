@@ -3,7 +3,10 @@ import { UploadPartCommand } from "@/utils/s3";
 import { z } from "zod";
 import {
   getAuthenticatedUploadUser,
+  getExpectedUploadPartSize,
+  getRequestContentLength,
   getStorageContextForUploadId,
+  getUploadRequestBodyStream,
 } from "../_shared";
 
 export const runtime = "nodejs";
@@ -50,12 +53,37 @@ export async function POST(request: Request) {
       );
     }
 
+    const expectedPartSize = getExpectedUploadPartSize({
+      totalSize: Number(context.uploadSession.size),
+      partSize: context.uploadSession.partSize,
+      partNumber: body.partNumber,
+    });
+
+    if (expectedPartSize === null || expectedPartSize <= 0) {
+      return Response.json(
+        { error: `Invalid part number ${body.partNumber}` },
+        { status: 400 },
+      );
+    }
+
+    const requestContentLength = getRequestContentLength(request);
+
+    if (
+      requestContentLength !== undefined &&
+      requestContentLength !== expectedPartSize
+    ) {
+      return Response.json(
+        { error: `Part ${body.partNumber} size mismatch` },
+        { status: 400 },
+      );
+    }
+
+    const bodyStream = getUploadRequestBodyStream(request);
+
     await prisma.uploadSession.update({
       where: { id: context.uploadSession.id },
       data: { status: "uploading" },
     });
-
-    const bytes = Buffer.from(await request.arrayBuffer());
 
     const result = await context.s3Client.send(
       new UploadPartCommand({
@@ -63,9 +91,12 @@ export async function POST(request: Request) {
         Key: context.uploadSession.key,
         UploadId: context.uploadSession.uploadId,
         PartNumber: body.partNumber,
-        Body: bytes,
-        ContentLength: bytes.byteLength,
+        Body: bodyStream,
+        ContentLength: expectedPartSize,
       }),
+      {
+        abortSignal: request.signal,
+      },
     );
 
     if (!result.ETag) {
