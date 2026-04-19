@@ -409,6 +409,7 @@ function UploadQueuePanel({
 const SUCCESS_TOAST_DURATION_MS = 2500;
 const INFO_TOAST_DURATION_MS = 2500;
 const ERROR_TOAST_DURATION_MS = 4000;
+const UPLOAD_PANEL_AUTO_DISMISS_DELAY_MS = 3000;
 const SIMPLE_UPLOAD_RETRY_COUNT = 2;
 const CONNECTIONS_LOAD_TOAST_ID = "connections-load-toast";
 const FILES_LOAD_TOAST_ID = "files-load-toast";
@@ -627,11 +628,19 @@ function getPreviewKind(file: Pick<PreviewFile, "mimeType" | "name">): PreviewKi
 
 function canReusePreviewCache(cachedFile: PreviewFile, item: DashboardItem) {
   const expiresAt = new Date(cachedFile.expiresAt).getTime();
+  const cachedUpdatedAt = Date.parse(cachedFile.updatedAt);
+  const itemUpdatedAt = item.updatedAt ? Date.parse(item.updatedAt) : Number.NaN;
+  const hasMatchingTimestamp =
+    Number.isFinite(cachedUpdatedAt) &&
+    Number.isFinite(itemUpdatedAt) &&
+    Math.abs(cachedUpdatedAt - itemUpdatedAt) < 1000;
 
   return (
     Number.isFinite(expiresAt) &&
     expiresAt - Date.now() > PREVIEW_CACHE_GRACE_MS &&
-    cachedFile.updatedAt === item.updatedAt
+    cachedFile.key === (item.key ?? cachedFile.key) &&
+    cachedFile.name === item.name &&
+    (hasMatchingTimestamp || cachedFile.updatedAt === item.updatedAt)
   );
 }
 
@@ -1148,6 +1157,7 @@ export function DashboardClient({
   const [isUploadPanelVisible, setIsUploadPanelVisible] = useState(false);
   const previewCacheRef = useRef<Map<string, PreviewCacheEntry>>(new Map());
   const previewRequestRef = useRef<Map<string, Promise<PreviewCacheEntry>>>(new Map());
+  const uploadPanelDismissTimeoutRef = useRef<number | null>(null);
   const dragDepthRef = useRef(0);
   const didInitialLoadRef = useRef(false);
   const didHydrateSidebarPreferenceRef = useRef(false);
@@ -1172,8 +1182,36 @@ export function DashboardClient({
 
       activeUploadControllerRef.current?.abort();
       activeUploadControllerRef.current = null;
+
+      if (uploadPanelDismissTimeoutRef.current !== null) {
+        window.clearTimeout(uploadPanelDismissTimeoutRef.current);
+        uploadPanelDismissTimeoutRef.current = null;
+      }
     };
   }, []);
+
+  useEffect(() => {
+    if (uploadPanelDismissTimeoutRef.current !== null) {
+      window.clearTimeout(uploadPanelDismissTimeoutRef.current);
+      uploadPanelDismissTimeoutRef.current = null;
+    }
+
+    if (!uploadPanel || !isUploadPanelVisible || uploadPanel.isActive) {
+      return;
+    }
+
+    uploadPanelDismissTimeoutRef.current = window.setTimeout(() => {
+      setIsUploadPanelVisible(false);
+      uploadPanelDismissTimeoutRef.current = null;
+    }, UPLOAD_PANEL_AUTO_DISMISS_DELAY_MS);
+
+    return () => {
+      if (uploadPanelDismissTimeoutRef.current !== null) {
+        window.clearTimeout(uploadPanelDismissTimeoutRef.current);
+        uploadPanelDismissTimeoutRef.current = null;
+      }
+    };
+  }, [isUploadPanelVisible, uploadPanel]);
 
   useEffect(() => {
     try {
