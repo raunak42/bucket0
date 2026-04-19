@@ -5,7 +5,7 @@ import {
   getAuthenticatedUploadUser,
   getRequestContentLength,
   getStorageContextForUploadId,
-  getUploadRequestBodyStream,
+  getUploadRequestBody,
 } from "../_shared";
 
 export const runtime = "nodejs";
@@ -66,7 +66,9 @@ export async function POST(request: Request) {
     const requestBody =
       expectedSize === 0
         ? new Uint8Array(0)
-        : getUploadRequestBodyStream(request);
+        : await getUploadRequestBody(request, {
+            buffer: context.connection.provider === "wasabi",
+          });
 
     await prisma.uploadSession.update({
       where: { id: context.uploadSession.id },

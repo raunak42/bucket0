@@ -75,9 +75,16 @@ export async function getStorageContextForUploadId({
   };
 }
 
-export function getUploadRequestBodyStream(request: Request) {
+export async function getUploadRequestBody(
+  request: Request,
+  options?: { buffer?: boolean },
+) {
   if (!request.body) {
     throw new Error("Missing upload body");
+  }
+
+  if (options?.buffer) {
+    return Buffer.from(await request.arrayBuffer());
   }
 
   return Readable.fromWeb(
