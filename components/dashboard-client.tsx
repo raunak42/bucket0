@@ -1943,14 +1943,34 @@ export function DashboardClient({
         return;
       }
 
-      const shouldParallelizeSimpleBatch =
-        candidates.length > 1 &&
-        candidates.every((candidate) => candidate.file.size <= CLIENT_SIMPLE_UPLOAD_MAX_BYTES);
-      const concurrency = shouldParallelizeSimpleBatch
-        ? Math.min(MAX_PARALLEL_SIMPLE_UPLOADS, candidates.length)
-        : 1;
+      const simpleCandidateIndices: number[] = [];
+      const multipartCandidateIndices: number[] = [];
+
+      candidates.forEach((candidate, index) => {
+        if (candidate.file.size <= CLIENT_SIMPLE_UPLOAD_MAX_BYTES) {
+          simpleCandidateIndices.push(index);
+        } else {
+          multipartCandidateIndices.push(index);
+        }
+      });
+
+      const simpleConcurrency = simpleCandidateIndices.length === 0
+        ? 0
+        : Math.min(MAX_PARALLEL_SIMPLE_UPLOADS, simpleCandidateIndices.length);
+      const title = multipartCandidateIndices.length > 0
+        ? simpleCandidateIndices.length > 0
+          ? simpleConcurrency > 1
+            ? `Uploading up to ${simpleConcurrency} small files at a time • large files one by one`
+            : "Uploading files • large files one by one"
+          : multipartCandidateIndices.length === 1
+            ? "Uploading large file"
+            : "Uploading large files one by one"
+        : simpleConcurrency > 1
+          ? `Uploading up to ${simpleConcurrency} files at a time`
+          : label;
       const controller = new AbortController();
-      let nextIndex = 0;
+      let nextSimpleQueueIndex = 0;
+      let nextMultipartQueueIndex = 0;
       let successCount = 0;
       let failureCount = 0;
       let firstFailureMessage: string | null = null;
@@ -1965,9 +1985,7 @@ export function DashboardClient({
       setIsUploading(true);
       setIsUploadPanelVisible(true);
       setUploadPanel({
-        title: shouldParallelizeSimpleBatch
-          ? `Uploading up to ${concurrency} files at a time`
-          : label,
+        title,
         items: panelItems,
         isActive: true,
         isCancelling: false,
@@ -2092,25 +2110,47 @@ export function DashboardClient({
         }
       };
 
-      const worker = async () => {
+      const runSimpleWorker = async () => {
         while (true) {
           if (controller.signal.aborted) {
             return;
           }
 
-          const index = nextIndex;
-          nextIndex += 1;
+          const queueIndex = nextSimpleQueueIndex;
+          nextSimpleQueueIndex += 1;
 
-          if (index >= candidates.length) {
+          const candidateIndex = simpleCandidateIndices[queueIndex];
+          if (candidateIndex === undefined) {
             return;
           }
 
-          await runCandidateUpload(candidates[index]!, panelItems[index]!);
+          await runCandidateUpload(candidates[candidateIndex]!, panelItems[candidateIndex]!);
+        }
+      };
+
+      const runMultipartWorker = async () => {
+        while (true) {
+          if (controller.signal.aborted) {
+            return;
+          }
+
+          const queueIndex = nextMultipartQueueIndex;
+          nextMultipartQueueIndex += 1;
+
+          const candidateIndex = multipartCandidateIndices[queueIndex];
+          if (candidateIndex === undefined) {
+            return;
+          }
+
+          await runCandidateUpload(candidates[candidateIndex]!, panelItems[candidateIndex]!);
         }
       };
 
       try {
-        await Promise.all(Array.from({ length: concurrency }, () => worker()));
+        await Promise.all([
+          ...Array.from({ length: simpleConcurrency }, () => runSimpleWorker()),
+          ...(multipartCandidateIndices.length > 0 ? [runMultipartWorker()] : []),
+        ]);
 
         if (controller.signal.aborted) {
           cancelOutstandingItems(activeUploadCanceledByUserRef.current ? "Upload canceled" : "Stopped");
