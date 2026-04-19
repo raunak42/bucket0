@@ -32,17 +32,13 @@ const deleteSchema = z.discriminatedUnion("type", [
 
 async function deleteExternalFolder({
   userId,
-  connectionId,
+  connection,
   fullPath,
 }: {
   userId: string;
-  connectionId: string;
+  connection: Awaited<ReturnType<typeof getStorageConnectionWithCredentialsForUser>>;
   fullPath: string;
 }) {
-  const connection = await getStorageConnectionWithCredentialsForUser(
-    userId,
-    connectionId,
-  );
   const client = createS3ClientForConnection(connection);
   const folderKey = buildConnectionFolderKey({
     connection,
@@ -161,7 +157,12 @@ export async function POST(request: Request) {
       return Response.json({ error: "Cannot delete root folder" }, { status: 400 });
     }
 
-    if (!body.connectionId) {
+    const targetConnection = await getStorageConnectionWithCredentialsForUser(
+      session.user.id,
+      body.connectionId,
+    );
+
+    if (targetConnection.type === "managed") {
       const segments = fullPath.split("/").filter(Boolean);
       const folderName = segments.at(-1);
       const parentPath = segments.slice(0, -1).join("/");
@@ -170,13 +171,10 @@ export async function POST(request: Request) {
         return Response.json({ error: "Invalid folder path" }, { status: 400 });
       }
 
-      const managedConnection = await getStorageConnectionWithCredentialsForUser(
-        session.user.id,
-      );
       const objects = await prisma.driveObject.findMany({
         where: {
           ownerId: session.user.id,
-          connectionId: managedConnection.id,
+          connectionId: targetConnection.id,
           OR: [
             {
               type: "folder",
@@ -194,7 +192,7 @@ export async function POST(request: Request) {
       }
 
       const keys = [...new Set(objects.map((object) => object.key).filter(Boolean))];
-      const client = createS3ClientForConnection(managedConnection);
+      const client = createS3ClientForConnection(targetConnection);
 
       if (keys.length > 0) {
         for (let index = 0; index < keys.length; index += 1000) {
@@ -202,7 +200,7 @@ export async function POST(request: Request) {
 
           await client.send(
             new DeleteObjectsCommand({
-              Bucket: managedConnection.bucketName,
+              Bucket: targetConnection.bucketName,
               Delete: {
                 Objects: chunk.map((key) => ({ Key: key })),
                 Quiet: true,
@@ -223,7 +221,7 @@ export async function POST(request: Request) {
 
     const result = await deleteExternalFolder({
       userId: session.user.id,
-      connectionId: body.connectionId,
+      connection: targetConnection,
       fullPath,
     });
 

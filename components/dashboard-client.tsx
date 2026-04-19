@@ -2276,11 +2276,16 @@ export function DashboardClient({
           },
           body: JSON.stringify(
             item.type === "folder"
-              ? {
-                  type: "folder",
-                  fullPath: item.fullPath,
-                  connectionId: selectedConnectionId,
-                }
+              ? activeConnection.type === "external"
+                ? {
+                    type: "folder",
+                    fullPath: item.fullPath,
+                    connectionId: selectedConnectionId,
+                  }
+                : {
+                    type: "folder",
+                    fullPath: item.fullPath,
+                  }
               : item.key && activeConnection.type === "external"
                 ? {
                     type: "file",
