@@ -14,6 +14,7 @@ import {
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 export const S3_SIGNED_URL_TTL_SECONDS = 15 * 60;
+const S3_REQUEST_STREAM_BUFFER_SIZE = 64 * 1024;
 
 type S3Provider = "internal" | "s3" | "r2" | "wasabi";
 
@@ -76,6 +77,7 @@ export function createS3Client(config: S3ConnectionConfig) {
     region: resolved.region,
     endpoint: resolved.endpoint || undefined,
     forcePathStyle: resolved.forcePathStyle,
+    requestStreamBufferSize: S3_REQUEST_STREAM_BUFFER_SIZE,
     credentials:
       config.accessKeyId && config.secretAccessKey
         ? {
