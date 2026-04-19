@@ -1409,6 +1409,7 @@ export function DashboardClient({
   const items = useMemo(() => data?.items ?? [], [data]);
   const totalMatchingItems = data?.pagination.totalItems ?? 0;
   const isFilteredEmptyState = query.trim().length > 0 || filter !== "all";
+  const isTrueEmptyState = totalMatchingItems === 0 && !isFilteredEmptyState;
   const currentPage = data?.pagination.page ?? page;
   const totalPages = data?.pagination.totalPages ?? 1;
   const pageStartIndex = data?.pagination.from ? data.pagination.from - 1 : 0;
@@ -3415,8 +3416,20 @@ export function DashboardClient({
               </section>
 
               <section className="flex min-h-0 flex-1 flex-col overflow-hidden bg-background">
-                <div className="flex min-h-11 flex-col gap-2 border-b border-border px-4 py-2.5 md:flex-row md:items-center md:justify-between">
-                  <div className="flex min-w-0 items-center gap-2 overflow-x-auto pb-1 text-sm text-muted-foreground [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:pb-0">
+                <div
+                  className={cn(
+                    "flex min-h-11 border-b border-border px-4 py-2.5 md:flex-row md:items-center md:justify-between",
+                    isTrueEmptyState
+                      ? "flex-col items-center justify-center gap-1.5 text-center"
+                      : "flex-col gap-2",
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "flex min-w-0 items-center gap-2 overflow-x-auto pb-1 text-sm text-muted-foreground [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:pb-0",
+                      isTrueEmptyState && "w-full justify-center pb-0 md:w-auto md:justify-start",
+                    )}
+                  >
                     {data?.breadcrumbs?.map((crumb, index) => (
                       <span key={crumb.path || "root"} className="flex shrink-0 items-center gap-2">
                         {index > 0 ? <ChevronRight className="size-3" /> : null}
@@ -3440,7 +3453,12 @@ export function DashboardClient({
                     ))}
                   </div>
 
-                  <p className="text-sm text-muted-foreground">
+                  <p
+                    className={cn(
+                      "text-sm text-muted-foreground",
+                      isTrueEmptyState && "w-full text-center md:w-auto md:text-left",
+                    )}
+                  >
                     {totalMatchingItems === 0
                       ? "Showing 0 items"
                       : `Showing ${pageStartIndex + 1}-${pageEndIndex} of ${totalMatchingItems}`}
