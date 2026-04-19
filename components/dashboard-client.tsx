@@ -4650,24 +4650,27 @@ export function DashboardClient({
           }
         }}
       >
-        <DialogContent className="max-h-[92vh] max-w-6xl p-0" showCloseButton={false}>
+        <DialogContent
+          className="grid h-full min-h-0 max-h-none max-w-none grid-rows-[auto_minmax(0,1fr)] p-0 sm:h-auto sm:max-h-[92vh] sm:max-w-6xl"
+          showCloseButton={false}
+        >
           <DialogClose asChild>
             <Button
               type="button"
               variant="outline"
               size="icon-sm"
-              className="absolute right-5 top-5 z-10 rounded-full border-border/80 bg-background/95 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-background/85 hover:bg-muted"
+              className="absolute right-3 top-3 z-10 rounded-full border-border/80 bg-background/95 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-background/85 hover:bg-muted sm:right-5 sm:top-5"
               aria-label="Close preview"
             >
               <X className="size-4" />
             </Button>
           </DialogClose>
 
-          <DialogHeader className="border-b border-border p-6 pr-20">
-            <div className="flex items-start justify-between gap-4">
-              <div className="min-w-0 space-y-2">
-                <div className="flex min-w-0 flex-wrap items-center gap-2">
-                  <DialogTitle className="truncate text-2xl font-semibold tracking-tight">
+          <DialogHeader className="border-b border-border p-4 sm:p-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div className="min-w-0 space-y-2 pr-14 sm:pr-20">
+                <div className="flex min-w-0 flex-wrap items-start gap-2 sm:items-center">
+                  <DialogTitle className="break-words text-lg font-semibold tracking-tight sm:truncate sm:text-2xl">
                     {previewFile?.name ?? "Loading preview..."}
                   </DialogTitle>
                   {previewFile?.mimeType ? (
@@ -4676,25 +4679,26 @@ export function DashboardClient({
                     </span>
                   ) : null}
                 </div>
-                <DialogDescription>
+                <DialogDescription className="pr-1 text-xs sm:text-sm">
                   {previewFile
                     ? `${formatBytes(previewFile.size)} • Updated ${formatUpdatedAt(previewFile.updatedAt)}`
                     : "Preparing secure preview"}
                 </DialogDescription>
               </div>
 
-              <div className="flex items-center gap-2 pr-10">
+              <div className="grid w-full grid-cols-1 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:items-center sm:justify-end sm:pr-10">
                 {previewFile ? (
                   <>
                     <Button
                       type="button"
                       variant="outline"
+                      className="w-full"
                       onClick={() => downloadFile(previewFile)}
                     >
                       <Download className="size-4" />
                       Download
                     </Button>
-                    <Button asChild variant="outline">
+                    <Button asChild variant="outline" className="w-full">
                       <a href={previewFile.previewUrl} target="_blank" rel="noreferrer">
                         <ExternalLink className="size-4" />
                         Open
@@ -4703,6 +4707,7 @@ export function DashboardClient({
                     <Button
                       type="button"
                       variant="destructive"
+                      className="w-full sm:w-auto"
                       onClick={() =>
                         requestDeleteItem({
                           id: previewFile.id,
@@ -4721,37 +4726,37 @@ export function DashboardClient({
             </div>
           </DialogHeader>
 
-          <div className="bg-muted/35 p-4 sm:p-6">
-            <div className="overflow-hidden rounded-2xl border border-border bg-background">
-              <div className="flex min-h-[70vh] items-center justify-center p-4 sm:p-6">
+          <div className="min-h-0 overflow-auto bg-background sm:bg-muted/35 sm:p-6">
+            <div className="flex min-h-full items-start justify-center overflow-hidden bg-background sm:items-center sm:rounded-2xl sm:border sm:border-border">
+              <div className="flex w-full items-start justify-center p-0 sm:min-h-full sm:items-center sm:p-6">
                 {isPreviewLoading ? (
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <LoaderCircle className="size-4 animate-spin" /> Loading preview...
                   </div>
                 ) : previewError ? (
-                  <div className="max-w-md space-y-3 text-center">
-                    <p className="text-lg font-medium tracking-tight">Preview unavailable</p>
+                  <div className="max-w-md space-y-3 px-2 text-center">
+                    <p className="text-base font-medium tracking-tight sm:text-lg">Preview unavailable</p>
                     <p className="text-sm text-muted-foreground">{previewError}</p>
                   </div>
                 ) : previewFile && previewKind === "image" ? (
                   <img
                     src={previewFile.previewUrl}
                     alt={previewFile.name}
-                    className="max-h-[68vh] max-w-full rounded-xl object-contain"
+                    className="block max-h-[calc(100dvh-12rem)] max-w-full object-contain sm:max-h-[68vh] sm:rounded-xl"
                   />
                 ) : previewFile && previewKind === "video" ? (
                   <video
                     src={previewFile.previewUrl}
                     controls
-                    className="max-h-[68vh] w-full rounded-xl bg-black"
+                    className="block max-h-[calc(100dvh-12rem)] w-full bg-black sm:max-h-[68vh] sm:rounded-xl"
                   />
                 ) : previewFile && previewKind === "audio" ? (
-                  <div className="flex w-full max-w-2xl flex-col items-center gap-6 rounded-xl border border-border bg-background px-6 py-10 text-center">
-                    <div className="flex size-16 items-center justify-center rounded-2xl bg-muted text-muted-foreground">
-                      <Music4 className="size-8" />
+                  <div className="flex w-full max-w-2xl flex-col items-center gap-5 rounded-lg border border-border bg-background px-4 py-8 text-center sm:gap-6 sm:rounded-xl sm:px-6 sm:py-10">
+                    <div className="flex size-14 items-center justify-center rounded-2xl bg-muted text-muted-foreground sm:size-16">
+                      <Music4 className="size-7 sm:size-8" />
                     </div>
                     <div className="space-y-1">
-                      <p className="text-lg font-medium tracking-tight">{previewFile.name}</p>
+                      <p className="break-words text-base font-medium tracking-tight sm:text-lg">{previewFile.name}</p>
                       <p className="text-sm text-muted-foreground">Audio preview</p>
                     </div>
                     <audio src={previewFile.previewUrl} controls className="w-full" />
@@ -4760,11 +4765,11 @@ export function DashboardClient({
                   <iframe
                     src={previewFile.previewUrl}
                     title={previewFile.name}
-                    className="h-[68vh] w-full rounded-xl bg-white"
+                    className="h-[calc(100dvh-12rem)] w-full bg-white sm:h-[68vh] sm:rounded-xl"
                   />
                 ) : previewFile && previewKind === "text" ? (
                   textPreview !== null ? (
-                    <div className="h-[68vh] w-full overflow-auto rounded-xl border border-border bg-muted/30 p-4 text-left">
+                    <div className="h-[calc(100dvh-12rem)] w-full overflow-auto border-y border-border bg-muted/30 p-4 text-left sm:h-[68vh] sm:rounded-xl sm:border">
                       <pre className="whitespace-pre-wrap break-words text-sm leading-6 text-foreground">
                         <code>{textPreview}</code>
                       </pre>
@@ -4775,24 +4780,24 @@ export function DashboardClient({
                     </div>
                   )
                 ) : previewFile ? (
-                  <div className="flex w-full max-w-xl flex-col items-center gap-5 rounded-xl border border-border bg-background px-6 py-10 text-center">
-                    <div className="flex size-16 items-center justify-center rounded-2xl bg-muted text-muted-foreground">
+                  <div className="flex w-full max-w-xl flex-col items-center gap-4 rounded-lg border border-border bg-background px-4 py-8 text-center sm:gap-5 sm:rounded-xl sm:px-6 sm:py-10">
+                    <div className="flex size-14 items-center justify-center rounded-2xl bg-muted text-muted-foreground sm:size-16">
                       {previewKind === "image" ? (
-                        <ImageIcon className="size-8" />
+                        <ImageIcon className="size-7 sm:size-8" />
                       ) : previewKind === "video" ? (
-                        <Video className="size-8" />
+                        <Video className="size-7 sm:size-8" />
                       ) : previewKind === "audio" ? (
-                        <Music4 className="size-8" />
+                        <Music4 className="size-7 sm:size-8" />
                       ) : previewKind === "text" ? (
-                        <FileCode2 className="size-8" />
+                        <FileCode2 className="size-7 sm:size-8" />
                       ) : previewKind === "pdf" ? (
-                        <FileText className="size-8" />
+                        <FileText className="size-7 sm:size-8" />
                       ) : (
-                        <File className="size-8" />
+                        <File className="size-7 sm:size-8" />
                       )}
                     </div>
                     <div className="space-y-1">
-                      <p className="text-lg font-medium tracking-tight">No inline preview</p>
+                      <p className="text-base font-medium tracking-tight sm:text-lg">No inline preview</p>
                       <p className="text-sm text-muted-foreground">
                         This file type can’t be rendered inline yet, but you can open or download it.
                       </p>

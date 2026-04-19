@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { Geist_Mono } from "next/font/google";
 import { AppToaster } from "@/components/app-toaster";
@@ -36,6 +36,12 @@ const siteUrl = process.env.BETTER_AUTH_URL ?? "http://localhost:3000";
 const siteTitle = "Bucket0";
 const siteDescription =
   "A modern file storage dashboard with managed storage and external S3-compatible buckets.";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
