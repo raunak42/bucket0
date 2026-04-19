@@ -3418,16 +3418,14 @@ export function DashboardClient({
               <section className="flex min-h-0 flex-1 flex-col overflow-hidden bg-background">
                 <div
                   className={cn(
-                    "flex min-h-11 border-b border-border px-4 py-2.5 md:flex-row md:items-center md:justify-between",
-                    isTrueEmptyState
-                      ? "flex-col items-center justify-center gap-1.5 text-center"
-                      : "flex-col gap-2",
+                    "flex min-h-11 flex-row items-center justify-between gap-3 border-b border-border px-4 py-2.5",
+                    isTrueEmptyState && "text-left",
                   )}
                 >
                   <div
                     className={cn(
-                      "flex min-w-0 items-center gap-2 overflow-x-auto pb-1 text-sm text-muted-foreground [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:pb-0",
-                      isTrueEmptyState && "w-full justify-center pb-0 md:w-auto md:justify-start",
+                      "flex min-w-0 flex-1 items-center gap-2 overflow-x-auto text-sm text-muted-foreground [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+                      isTrueEmptyState && "justify-start",
                     )}
                   >
                     {data?.breadcrumbs?.map((crumb, index) => (
@@ -3455,8 +3453,8 @@ export function DashboardClient({
 
                   <p
                     className={cn(
-                      "text-sm text-muted-foreground",
-                      isTrueEmptyState && "w-full text-center md:w-auto md:text-left",
+                      "shrink-0 text-right text-sm text-muted-foreground",
+                      isTrueEmptyState && "text-right",
                     )}
                   >
                     {totalMatchingItems === 0
