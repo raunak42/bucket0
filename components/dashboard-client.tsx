@@ -3476,30 +3476,35 @@ export function DashboardClient({
                       </p>
                     </div>
                   ) : (
-                    <div className="flex flex-1 items-center justify-center px-4 py-8 sm:px-6 sm:py-10">
-                      <div className="w-full max-w-3xl">
-                        <div className="mx-auto max-w-xl text-center">
-                          <div className="mx-auto flex size-20 items-center justify-center rounded-[22px] border border-dashed border-border bg-muted/20 text-muted-foreground sm:size-24">
-                            <Upload className="size-8 sm:size-9" />
+                    <div className="min-h-0 flex-1 overflow-y-auto px-4 py-6 sm:flex sm:items-center sm:justify-center sm:px-6 sm:py-10">
+                      <div className="w-full max-w-3xl pb-4 sm:pb-0">
+                        <div className="mx-auto max-w-xl text-center sm:text-center">
+                          <div className="mx-auto flex size-18 items-center justify-center rounded-[20px] border border-dashed border-border bg-muted/20 text-muted-foreground sm:size-24 sm:rounded-[22px]">
+                            <Upload className="size-7 sm:size-9" />
                           </div>
 
-                          <div className="mt-6 space-y-2.5">
-                            <p className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+                          <div className="mt-5 space-y-2.5 sm:mt-6">
+                            <p className="text-xl font-semibold tracking-tight text-foreground sm:text-3xl">
                               {currentPath
                                 ? "This folder is empty"
                                 : activeConnection?.type === "external"
                                   ? "This bucket is empty"
                                   : "Your storage is empty"}
                             </p>
-                            <p className="text-sm leading-7 text-muted-foreground sm:text-base">
+                            <p className="mx-auto max-w-md text-sm leading-6 text-muted-foreground sm:text-base sm:leading-7">
                               Upload files to get started, or drag them anywhere in this view.
                             </p>
                           </div>
 
-                          <div className="mt-6">
+                          <div className="mt-5 sm:mt-6">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <Button type="button" size="lg" disabled={isUploading || isCreatingFolder}>
+                                <Button
+                                  type="button"
+                                  size="lg"
+                                  className="w-full sm:w-auto"
+                                  disabled={isUploading || isCreatingFolder}
+                                >
                                   {isUploading ? (
                                     <LoaderCircle className="size-4 animate-spin" />
                                   ) : (
@@ -3522,23 +3527,23 @@ export function DashboardClient({
                           </div>
                         </div>
 
-                        <div className="mt-8 overflow-hidden rounded-xl border border-border bg-background">
+                        <div className="mt-6 overflow-hidden rounded-xl border border-border bg-background sm:mt-8">
                           <div className="grid divide-y divide-border sm:grid-cols-3 sm:divide-x sm:divide-y-0">
                             <div className="px-4 py-4 text-left sm:px-5">
                               <p className="text-sm font-medium tracking-tight text-foreground">Drag & drop</p>
-                              <p className="mt-1 text-sm text-muted-foreground">
+                              <p className="mt-1 text-sm leading-6 text-muted-foreground">
                                 Drop files anywhere in this view to upload instantly.
                               </p>
                             </div>
                             <div className="px-4 py-4 text-left sm:px-5">
                               <p className="text-sm font-medium tracking-tight text-foreground">Folders</p>
-                              <p className="mt-1 text-sm text-muted-foreground">
+                              <p className="mt-1 text-sm leading-6 text-muted-foreground">
                                 Upload full folders and keep their nested structure.
                               </p>
                             </div>
                             <div className="px-4 py-4 text-left sm:px-5">
                               <p className="text-sm font-medium tracking-tight text-foreground">Preview</p>
-                              <p className="mt-1 text-sm text-muted-foreground">
+                              <p className="mt-1 text-sm leading-6 text-muted-foreground">
                                 Open images, video, audio, PDFs, and text files after upload.
                               </p>
                             </div>
