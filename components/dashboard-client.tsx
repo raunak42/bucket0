@@ -311,16 +311,6 @@ function UploadQueuePanel({
   const successCount = state.items.filter((item) => item.status === "success").length;
   const errorCount = state.items.filter((item) => item.status === "error").length;
   const canceledCount = state.items.filter((item) => item.status === "canceled").length;
-  const totalBytes = state.items.reduce((sum, item) => sum + item.size, 0);
-  const loadedBytes = state.items.reduce(
-    (sum, item) => sum + Math.min(item.loaded, item.size),
-    0,
-  );
-  const overallProgress = totalBytes > 0
-    ? clampProgress((loadedBytes / totalBytes) * 100)
-    : state.items.length > 0
-      ? clampProgress((finishedCount / state.items.length) * 100)
-      : 0;
   const heading = state.isActive
     ? `Uploading ${finishedCount}/${state.items.length} ${state.items.length === 1 ? "item" : "items"}`
     : errorCount > 0 || canceledCount > 0
@@ -368,15 +358,6 @@ function UploadQueuePanel({
           </div>
         </div>
 
-        <div className="mt-3 space-y-1.5">
-          <Progress value={overallProgress} />
-          <div className="flex items-center justify-between gap-3 text-[11px] text-muted-foreground">
-            <span>
-              {formatBytes(String(Math.min(loadedBytes, totalBytes)))} of {formatBytes(String(totalBytes))}
-            </span>
-            <span>{Math.round(overallProgress)}%</span>
-          </div>
-        </div>
       </div>
 
       <div className="max-h-80 overflow-y-auto">
